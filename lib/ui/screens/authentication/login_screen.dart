@@ -4,6 +4,7 @@ import 'package:universe/ui/components/bars/custom_text_field.dart';
 import 'package:universe/ui/components/custom_elevated_button.dart';
 import 'package:universe/ui/screens/authentication/signup_screen.dart'; // For navigation to signup
 import 'package:universe/ui/screens/home_screen.dart'; // For navigation to home
+import 'package:universe/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,28 +15,130 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement actual login logic (e.g., API call)
-      print('Logging in with:');
-      print('Username: ${_usernameController.text}');
-      print('Password: ${_passwordController.text}');
+      setState(() {
+        _isLoading = true;
+      });
 
-      // Simulate successful login and navigate to home screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      try {
+        await _authService.signInWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+        
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  void _loginWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _loginWithFacebook() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.signInWithFacebook();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _forgotPassword() async {
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email first')),
       );
+      return;
+    }
+
+    try {
+      await _authService.sendPasswordResetEmail(_emailController.text.trim());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset email sent')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 
@@ -97,10 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // If your Google logo is already colored, you might remove iconColor.
                       // iconColor: Colors.red[700],
                       iconSize: 35.0, // Increased icon size for the image
-                      onPressed: () {
-                        // TODO: Implement Google login
-                        print('Login with Google');
-                      },
+                      onPressed: _isLoading ? null : _loginWithGoogle,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -113,10 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       textColor: Colors.black87,
                       iconColor: Colors.blue[800], // More visible blue
                       iconSize: 35.0, // Increased icon size
-                      onPressed: () {
-                        // TODO: Implement Facebook login
-                        print('Login with Facebook');
-                      },
+                      onPressed: _isLoading ? null : _loginWithFacebook,
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -131,13 +228,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Username Field
+                  // Email Field
                   CustomTextField(
-                    controller: _usernameController,
-                    hintText: 'Username',
+                    controller: _emailController,
+                    hintText: 'Email',
+                    keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your username';
+                        return 'Please enter your email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Please enter a valid email';
                       }
                       return null;
                     },
@@ -166,8 +267,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity, // Make it take full available width
                     child: CustomElevatedButton(
-                      text: 'Log in',
-                      onPressed: _login,
+                      text: _isLoading ? 'Logging in...' : 'Log in',
+                      onPressed: _isLoading ? null : _login,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -176,10 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.center,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement forgot password logic
-                        print('Forgot Password?');
-                      },
+                      onPressed: _isLoading ? null : _forgotPassword,
                       child: const Text(
                         'Forgot password?',
                         style: TextStyle(color: Colors.black54),
@@ -197,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.black54),
                       ),
                       GestureDetector(
-                        onTap: () {
+                        onTap: _isLoading ? null : () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const SignupScreen()),

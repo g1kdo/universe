@@ -4,6 +4,7 @@ import 'package:universe/ui/components/bars/custom_text_field.dart';
 import 'package:universe/ui/components/custom_elevated_button.dart';
 import 'package:universe/ui/screens/authentication/login_screen.dart'; // For navigation to login
 import 'package:universe/ui/screens/home_screen.dart'; // For navigation to home
+import 'package:universe/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,33 +15,117 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _retypePasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _retypePasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _signup() {
+  void _signup() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement actual signup logic (e.g., API call)
-      print('Signing up with:');
-      print('Username: ${_usernameController.text}');
-      print('Email: ${_emailController.text}');
-      print('Password: ${_passwordController.text}');
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match')),
+        );
+        return;
+      }
 
-      // Simulate successful signup and navigate to home screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await _authService.createUserWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+        
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  void _signupWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _signupWithFacebook() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.signInWithFacebook();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -79,15 +164,63 @@ class _SignupScreenState extends State<SignupScreen> {
                       color: Colors.black87,
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Sign up to get started!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black54,
+                    ),
+                  ),
                   const SizedBox(height: 40),
 
-                  // Username Field
+                  // Social Login Buttons
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomElevatedButton(
+                      text: 'Sign up with Google',
+                      imageIcon: const AssetImage('assets/images/google.png'),
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black87,
+                      iconSize: 35.0,
+                      onPressed: _isLoading ? null : _signupWithGoogle,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width: double.infinity,
+                    child: CustomElevatedButton(
+                      text: 'Sign up with Facebook',
+                      icon: Icons.facebook,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black87,
+                      iconColor: Colors.blue[800],
+                      iconSize: 35.0,
+                      onPressed: _isLoading ? null : _signupWithFacebook,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // OR Divider
+                  const Text(
+                    'OR',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Name Field
                   CustomTextField(
-                    controller: _usernameController,
-                    hintText: 'Username',
+                    controller: _nameController,
+                    hintText: 'Full Name',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a username';
+                        return 'Please enter your full name';
+                      }
+                      if (value.length < 2) {
+                        return 'Name must be at least 2 characters';
                       }
                       return null;
                     },
@@ -128,29 +261,26 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Re-type Password Field
+                  // Confirm Password Field
                   CustomTextField(
-                    controller: _retypePasswordController,
-                    hintText: 'Re-type Password',
+                    controller: _confirmPasswordController,
+                    hintText: 'Confirm Password',
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please re-type your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Must match both passwords';
+                        return 'Please confirm your password';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 30),
 
-                  // Continue Button
+                  // Sign Up Button
                   SizedBox(
                     width: double.infinity, // Make it take full available width
                     child: CustomElevatedButton(
-                      text: 'Continue',
-                      onPressed: _signup,
+                      text: _isLoading ? 'Creating Account...' : 'Sign Up',
+                      onPressed: _isLoading ? null : _signup,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -164,7 +294,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(color: Colors.black54),
                       ),
                       GestureDetector(
-                        onTap: () {
+                        onTap: _isLoading ? null : () {
                           Navigator.pushReplacement( // Using pushReplacement to avoid stacking login screens
                             context,
                             MaterialPageRoute(builder: (context) => const LoginScreen()),

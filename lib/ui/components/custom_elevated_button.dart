@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
   final IconData? icon; // Optional IconData icon
@@ -14,7 +14,7 @@ class CustomElevatedButton extends StatelessWidget {
   const CustomElevatedButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.backgroundColor,
     this.textColor,
     this.icon,
@@ -35,6 +35,10 @@ class CustomElevatedButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         elevation: 5,
+      ).copyWith(
+        backgroundColor: onPressed == null 
+          ? MaterialStateProperty.all(Colors.grey[400])
+          : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

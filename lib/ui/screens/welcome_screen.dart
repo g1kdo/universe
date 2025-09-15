@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:universe/ui/screens/authentication/login_screen.dart';
+import 'package:universe/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'home_screen.dart';
 
@@ -71,6 +73,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
 
   // Add a boolean flag to indicate if animations are initialized
   bool _animationsInitialized = false;
+  
+  // Firebase authentication
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -129,6 +134,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
     // Start the logo animation
     _logoAnimationController.forward();
 
+    // Check authentication state
+    _checkAuthState();
+
     // Ensure _animationsInitialized is set to true after the first frame
     // This guarantees that all 'late' variables are initialized before
     // the build method attempts to use them in subsequent renders.
@@ -137,6 +145,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
         setState(() {
           _animationsInitialized = true;
         });
+      }
+    });
+  }
+
+  void _checkAuthState() {
+    _authService.authStateChanges.listen((User? user) {
+      if (user != null && mounted) {
+        // User is already logged in, navigate to home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
       }
     });
   }
