@@ -8,7 +8,8 @@ plugins {
 
 android {
     namespace = "rw.universe.universe"
-    compileSdk = 35
+    compileSdk = flutter.compileSdkVersion
+    buildToolsVersion = "33.0.2"
     ndkVersion = "27.0.12077973"
 
     compileOptions {
