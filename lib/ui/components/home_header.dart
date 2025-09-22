@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 class HomeHeader extends StatelessWidget {
   final String userName;
   final String userLocation;
-  final String profileImageUrl;
+  final String? profileImageUrl;
+  final bool isAuthenticated;
 
   const HomeHeader({
     super.key,
     required this.userName,
     required this.userLocation,
-    required this.profileImageUrl,
+    this.profileImageUrl,
+    required this.isAuthenticated,
   });
 
   @override
@@ -42,14 +44,29 @@ class HomeHeader extends StatelessWidget {
                     color: Colors.grey[600],
                   ),
                 ),
-                const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
+                if (isAuthenticated)
+                  const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
               ],
             ),
+            if (!isAuthenticated) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Sign in to access all features',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ],
         ),
         CircleAvatar(
           radius: 25,
-          backgroundImage: NetworkImage(profileImageUrl),
+          backgroundImage: profileImageUrl != null ? NetworkImage(profileImageUrl!) : null,
+          child: profileImageUrl == null 
+            ? const Icon(Icons.person, size: 25, color: Colors.grey)
+            : null,
         ),
       ],
     );

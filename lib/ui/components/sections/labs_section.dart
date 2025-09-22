@@ -1,16 +1,19 @@
-// lib/ui/components/sections/labs_section.dart (Updated path: now in 'sections' directory)
+// lib/ui/components/sections/labs_section.dart
 import 'package:flutter/material.dart';
-import 'package:universe/ui/components/cards/lab_card.dart'; // Import the LabCard component
+import 'package:universe/ui/components/cards/lab_card.dart';
+import 'package:universe/models/lab_model.dart';
 
 /// Component for the Labs section title and grid.
 class LabsSection extends StatelessWidget {
-  final List<Map<String, String>> labs;
-  final Function(Map<String, String>) onLabTap; // Add this line
+  final List<Lab> labs;
+  final Function(Lab) onLabTap;
+  final String title;
 
   const LabsSection({
     super.key,
     required this.labs,
-    required this.onLabTap, // Add this line
+    required this.onLabTap,
+    this.title = 'LABS',
   });
 
   @override
@@ -18,9 +21,9 @@ class LabsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'LABS',
-          style: TextStyle(
+        Text(
+          title,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -40,10 +43,8 @@ class LabsSection extends StatelessWidget {
           itemBuilder: (context, index) {
             final lab = labs[index];
             return LabCard(
-              name: lab['name']!,
-              floor: lab['floor']!,
-              imageUrl: lab['image']!,
-              onTap: () => onLabTap(lab), // Pass the callback to LabCard
+              lab: lab,
+              onTap: () => onLabTap(lab),
             );
           },
         ),

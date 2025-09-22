@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:universe/ui/components/details_screen_components/detail_description_section.dart';
 import 'package:universe/ui/screens/virtual_reality_tour.dart';
+import 'package:universe/models/lab_model.dart';
 
 import '../components/details_screen_components/detail_image_header.dart';
 import '../components/details_screen_components/detail_info_section.dart';
 
 class DetailsScreen extends StatelessWidget {
-  final Map<String, String> lab;
+  final Lab lab;
 
   const DetailsScreen({super.key, required this.lab});
 
@@ -15,14 +16,14 @@ class DetailsScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          DetailImageHeader(imageUrl: lab['image']!),
+          DetailImageHeader(lab: lab),
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
                   Text(
-                    lab['name']!,
+                    lab.name,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -30,13 +31,16 @@ class DetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   DetailInfoSection(
-                    accommodation: lab['accommodation']!,
-                    floor: lab['floor']!,
-                    type: lab['type']!,
+                    accommodation: lab.accommodation,
+                    floor: lab.floor,
+                    type: lab.type,
+                    isAvailable: lab.isAvailable,
+                    equipment: lab.equipment,
+                    contactPerson: lab.contactPerson,
                   ),
                   const SizedBox(height: 24),
                   DetailDescriptionSection(
-                    description: lab['description']!,
+                    description: lab.description,
                   ),
                   const SizedBox(height: 30),
                   SizedBox(

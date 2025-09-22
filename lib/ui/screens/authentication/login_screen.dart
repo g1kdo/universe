@@ -90,33 +90,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _loginWithFacebook() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _authService.signInWithFacebook();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   void _forgotPassword() async {
     if (_emailController.text.trim().isEmpty) {
@@ -201,19 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       // iconColor: Colors.red[700],
                       iconSize: 35.0, // Increased icon size for the image
                       onPressed: _isLoading ? null : _loginWithGoogle,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  SizedBox( // Wrap in SizedBox to control width
-                    width: double.infinity, // Make it take full available width
-                    child: CustomElevatedButton(
-                      text: 'Log in with Facebook',
-                      icon: Icons.facebook, // Keep using IconData for Facebook if you prefer
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black87,
-                      iconColor: Colors.blue[800], // More visible blue
-                      iconSize: 35.0, // Increased icon size
-                      onPressed: _isLoading ? null : _loginWithFacebook,
                     ),
                   ),
                   const SizedBox(height: 30),

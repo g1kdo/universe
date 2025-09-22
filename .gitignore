@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Documentation files (keep main README.md)
+FIRESTORE_SETUP_GUIDE.md
+FIREBASE_TROUBLESHOOTING_GUIDE.md
+AUTHENTICATION_FLOW_GUIDE.md
+PROFILE_SCREEN_IMPLEMENTATION_GUIDE.md
+GOOGLE_MAPS_SETUP_GUIDE.md
+FIRESTORE_RULES_UPDATE_GUIDE.md
+FIRESTORE_RULES_GUIDE.md
+firestore_sample_data.json

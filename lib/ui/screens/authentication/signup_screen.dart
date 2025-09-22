@@ -101,33 +101,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  void _signupWithFacebook() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _authService.signInWithFacebook();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,19 +157,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       textColor: Colors.black87,
                       iconSize: 35.0,
                       onPressed: _isLoading ? null : _signupWithGoogle,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  SizedBox(
-                    width: double.infinity,
-                    child: CustomElevatedButton(
-                      text: 'Sign up with Facebook',
-                      icon: Icons.facebook,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black87,
-                      iconColor: Colors.blue[800],
-                      iconSize: 35.0,
-                      onPressed: _isLoading ? null : _signupWithFacebook,
                     ),
                   ),
                   const SizedBox(height: 30),

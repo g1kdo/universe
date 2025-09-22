@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 /// Component for the search bar and filter icon.
 class SearchBarWidget extends StatelessWidget {
   final VoidCallback onFilterPressed;
+  final TextEditingController? controller;
 
   const SearchBarWidget({
     super.key,
     required this.onFilterPressed,
+    this.controller,
   });
 
   @override
@@ -21,8 +23,9 @@ class SearchBarWidget extends StatelessWidget {
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
                 hintText: 'Search by name, type..',
                 border: InputBorder.none,
                 icon: Icon(Icons.search, color: Colors.grey),

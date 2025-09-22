@@ -1,7 +1,9 @@
 // lib/ui/screens/schedule_screen.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For date formatting
-import 'package:universe/ui/components/cards/schedule_card.dart'; // Import ScheduleCard
+import 'package:intl/intl.dart';
+import 'package:universe/ui/components/cards/schedule_card.dart';
+import 'package:universe/services/firestore_service.dart';
+import 'package:universe/models/user_schedule_model.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -11,39 +13,28 @@ class ScheduleScreen extends StatefulWidget {
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  DateTime _selectedDate = DateTime.now(); // Current selected date
+  DateTime _selectedDate = DateTime.now();
   final List<String> _daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  final FirestoreService _firestoreService = FirestoreService();
 
-  // Example schedule data for the selected date
-  final List<Map<String, dynamic>> _scheduleData = [
-    {
-      'time_start': '11:35',
-      'time_end': '13:05',
-      'title': 'Computer Science',
-      'subtitle': 'Lecture 2: Data management',
-      'room': 'Room 2 - 134',
-      'instructor': 'Mom Laila Khalid',
-      'color': const Color(0xFFD9F7D4), // Light Green
-    },
-    {
-      'time_start': '13:15',
-      'time_end': '14:45',
-      'title': 'Digital Marketing',
-      'subtitle': 'Lecture 3: Shopify Creation',
-      'room': 'Room 3A - 04',
-      'instructor': 'Mom Hira',
-      'color': const Color(0xFFFFF9C4), // Light Yellow
-    },
-    {
-      'time_start': '15:10',
-      'time_end': '16:40',
-      'title': 'Digital Marketing',
-      'subtitle': 'Lecture 3: Shopify Creation',
-      'room': 'Room 7B - 81',
-      'instructor': 'Mom Hira',
-      'color': const Color(0xFFD3E0EA), // Light Blue/Gray
-    },
-  ];
+  Color _getEventColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'academic':
+        return const Color(0xFFD9F7D4); // Light Green
+      case 'sports':
+        return const Color(0xFFE8F5E8); // Light Green
+      case 'cultural':
+        return const Color(0xFFF3E5F5); // Light Purple
+      case 'social':
+        return const Color(0xFFFFF9C4); // Light Yellow
+      case 'workshop':
+        return const Color(0xFFE3F2FD); // Light Blue
+      case 'conference':
+        return const Color(0xFFD3E0EA); // Light Blue/Gray
+      default:
+        return const Color(0xFFF5F5F5); // Light Gray
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,59 +173,97 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
             // --- Schedule List Section ---
             Expanded(
-              child: Row(
-                children: [
-                  // Time Column
-                  Container(
-                    width: 80, // Fixed width for time column
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: _scheduleData.map((event) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0 + 8.0), // Match card margin + some extra
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                event['time_start'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              Text(
-                                event['time_end'],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
+              child: StreamBuilder<List<UserSchedule>>(
+                stream: _firestoreService.getUserScheduleForDate(_selectedDate),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  
+                  final scheduleItems = snapshot.data ?? [];
+                  
+                  if (scheduleItems.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.event_busy,
+                            size: 64,
+                            color: Colors.grey,
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  // Courses/Events Column
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(right: 16.0), // Padding on the right
-                      itemCount: _scheduleData.length,
-                      itemBuilder: (context, index) {
-                        final event = _scheduleData[index];
-                        return ScheduleCard(
-                          title: event['title'],
-                          subtitle: event['subtitle'],
-                          room: event['room'],
-                          instructor: event['instructor'],
-                          cardColor: event['color'],
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                          SizedBox(height: 16),
+                          Text(
+                            'No events scheduled for this date',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  return Row(
+                    children: [
+                      // Time Column
+                      Container(
+                        width: 80,
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: scheduleItems.map((event) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0 + 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    event.time,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Event',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      // Events Column
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          itemCount: scheduleItems.length,
+                          itemBuilder: (context, index) {
+                            final event = scheduleItems[index];
+                            return ScheduleCard(
+                              title: event.eventTitle,
+                              subtitle: event.eventDescription,
+                              room: event.location,
+                              instructor: event.organizer,
+                              cardColor: _getEventColor(event.category),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],

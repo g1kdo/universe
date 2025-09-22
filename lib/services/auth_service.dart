@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Current user getter
   User? get currentUser => _auth.currentUser;
@@ -31,6 +32,10 @@ class AuthService {
         email: email,
         password: password,
       );
+      
+      // Create user document in Firestore
+      await _createOrUpdateUserDocument(credential.user!);
+      
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -49,27 +54,17 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
 
-      return await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+      
+      // Create or update user document in Firestore
+      await _createOrUpdateUserDocument(userCredential.user!);
+      
+      return userCredential;
     } catch (e) {
       throw Exception('Google sign in failed: $e');
     }
   }
 
-  // Facebook Sign In
-  Future<UserCredential?> signInWithFacebook() async {
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-      
-      if (result.status == LoginStatus.success) {
-        final OAuthCredential facebookAuthCredential = 
-            FacebookAuthProvider.credential(result.accessToken!.tokenString);
-        return await _auth.signInWithCredential(facebookAuthCredential);
-      }
-      return null;
-    } catch (e) {
-      throw Exception('Facebook sign in failed: $e');
-    }
-  }
 
   // Password Reset
   Future<void> sendPasswordResetEmail(String email) async {
@@ -86,11 +81,50 @@ class AuthService {
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
-        FacebookAuth.instance.logOut(),
       ]);
     } catch (e) {
       throw Exception('Sign out failed: $e');
     }
+  }
+
+  // Create or update user document in Firestore
+  Future<void> _createOrUpdateUserDocument(User user) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      
+      if (!userDoc.exists) {
+        // Create new user document
+        await _firestore.collection('users').doc(user.uid).set({
+          'name': user.displayName ?? 'User',
+          'email': user.email ?? '',
+          'location': 'Campus',
+          'profileImageUrl': user.photoURL,
+          'role': 'student',
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastLoginAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        // Update last login time
+        await _firestore.collection('users').doc(user.uid).update({
+          'lastLoginAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      print('Error creating/updating user document: $e');
+      // Don't throw error here to avoid breaking the auth flow
+    }
+  }
+
+  // Check if user is authenticated
+  bool get isAuthenticated => _auth.currentUser != null;
+
+  // Get user display name (for guest users)
+  String getUserDisplayName() {
+    final user = _auth.currentUser;
+    if (user != null) {
+      return user.displayName ?? 'User';
+    }
+    return 'Visitor';
   }
 
   // Handle Firebase Auth Exceptions

@@ -9,8 +9,13 @@ import 'package:universe/ui/components/bars/app_bottom_navigation_bar.dart';
 import 'package:universe/ui/screens/community_screen.dart';
 import 'package:universe/ui/screens/schedule_screen.dart';
 import 'package:universe/ui/screens/profile_screen.dart';
-import 'package:universe/ui/screens/maps_screen.dart'; // Import MapsScreen
-import 'package:universe/ui/screens/details_screen.dart'; // Import DetailsScreen
+import 'package:universe/ui/screens/maps_screen.dart';
+import 'package:universe/ui/screens/details_screen.dart';
+import 'package:universe/services/firestore_service.dart';
+import 'package:universe/models/event_model.dart';
+import 'package:universe/models/lab_model.dart';
+import 'package:universe/models/news_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // --- Main HomeScreen Widget ---
 
@@ -25,52 +30,144 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedFilter = 'Labs';
   String _selectedNewsEventsTab = 'News';
   int _bottomNavIndex = 0; // State for bottom navigation
+  String _searchQuery = ''; // Global search query
 
-  // Placeholder data for the sections
+  final FirestoreService _firestoreService = FirestoreService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _searchController = TextEditingController();
+  
+  // Data streams - initialize immediately to avoid late initialization errors
+  late final Stream<List<Lab>> _labsStream = _firestoreService.getLabs();
+  late final Stream<List<Event>> _eventsStream = _firestoreService.getEvents();
+  late final Stream<List<News>> _newsStream = _firestoreService.getNews();
+  
+  // User profile data - using FutureBuilder instead of StreamBuilder
+  Map<String, dynamic>? _userProfile;
+  bool _isLoadingProfile = true;
+
+  // Placeholder data for filter chips
   final List<String> _filterChips = ['Labs', 'Canteen', 'Office', 'Gym', 'Library', 'Hostel'];
-  final List<Map<String, String>> _labsData = [
-    {'name': 'Chemistry Lab', 'floor': '1 floor', 'image': 'https://placehold.co/400x300/B0E0E6/000000?text=Chemistry', 'accommodation': '100-150 people', 'type': 'Labs', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'},
-    {'name': 'Computer Lab', 'floor': '2 floor', 'image': 'https://placehold.co/400x300/ADD8E6/000000?text=Computer', 'accommodation': '80-120 people', 'type': 'Labs', 'description': 'The Computer Lab is equipped with the latest hardware and software, providing students with a cutting-edge environment for programming, research, and project development. It supports various operating systems and specialized applications for different academic needs.'},
-    {'name': 'Physics Lab', 'floor': '3 floor', 'image': 'https://placehold.co/400x300/87CEEB/000000?text=Physics', 'accommodation': '70-100 people', 'type': 'Labs', 'description': 'Our Physics Lab offers state-of-the-art equipment for conducting experiments in mechanics, optics, electricity, and magnetism. Students can gain hands-on experience and develop a deeper understanding of physical principles through practical applications and observations.'},
-    {'name': 'Research Lab', 'floor': '3 floor', 'image': 'https://placehold.co/400x300/6495ED/000000?text=Research', 'accommodation': '50-70 people', 'type': 'Labs', 'description': 'The Research Lab is dedicated to advanced scientific inquiry and discovery. It provides a collaborative space for faculty and students to work on innovative research projects, equipped with specialized instruments and resources to facilitate groundbreaking studies across various disciplines.'},
-  ];
-  final List<Map<String, String>> _newsData = [
-    {
-      'title': 'FBISE',
-      'content': 'The Federal Board of Intermediate and Secondary Education (FBISE) has officially announced the date for the results...',
-      'date': 'May 01',
-    },
-    {
-      'title': 'Gaza',
-      'content': 'The Pakistan Medical and Dental Council (PM&DC) has permitted medical/dental colleges from Gaza to complete their studies...',
-      'date': 'June 07',
-    },
-    {
-      'title': 'LUMS',
-      'content': 'LUMS recently celebrated the graduation of its largest cohort to date, with over 1500 students receiving degrees...',
-      'date': 'May 01',
-    },
-  ];
-  final List<Map<String, String>> _eventsData = [
-    {
-      'title': 'IDP Study Abroad Expo',
-      'location': 'Islamabad',
-      'date': 'Wed, 28 Feb 2024',
-      'image': 'https://placehold.co/100x80/E0BBE4/FFFFFF?text=Event1',
-    },
-    {
-      'title': 'Pathways to Development Conference',
-      'location': 'Lahore',
-      'date': 'Fri, 19 Apr 2024',
-      'image': 'https://placehold.co/100x80/957DAD/FFFFFF?text=Event2',
-    },
-    {
-      'title': 'IELTS Information Session',
-      'location': 'Online',
-      'date': 'Mon, 10 Mar 2024',
-      'image': 'https://placehold.co/100x80/D291BC/FFFFFF?text=Event3',
-    },
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+    });
+  }
+
+  // Helper method to filter labs based on selected filter and search query
+  List<Lab> _filterLabs(List<Lab> labs) {
+    List<Lab> filteredLabs = labs;
+
+    // Filter by category
+    if (_selectedFilter != 'Labs') {
+      filteredLabs = labs.where((lab) => 
+        lab.category.toLowerCase() == _selectedFilter.toLowerCase()
+      ).toList();
+    }
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      filteredLabs = filteredLabs.where((lab) =>
+        lab.name.toLowerCase().contains(_searchQuery) ||
+        lab.type.toLowerCase().contains(_searchQuery) ||
+        lab.description.toLowerCase().contains(_searchQuery) ||
+        lab.accommodation.toLowerCase().contains(_searchQuery) ||
+        lab.floor.toLowerCase().contains(_searchQuery) ||
+        lab.category.toLowerCase().contains(_searchQuery)
+      ).toList();
+    }
+
+    return filteredLabs;
+  }
+
+  // Helper method to filter events based on search query
+  List<Event> _filterEvents(List<Event> events) {
+    if (_searchQuery.isEmpty) return events;
+    
+    return events.where((event) =>
+      event.title.toLowerCase().contains(_searchQuery) ||
+      event.description.toLowerCase().contains(_searchQuery) ||
+      event.location.toLowerCase().contains(_searchQuery) ||
+      event.category.toLowerCase().contains(_searchQuery) ||
+      event.organizer.toLowerCase().contains(_searchQuery)
+    ).toList();
+  }
+
+  // Helper method to filter news based on search query
+  List<News> _filterNews(List<News> news) {
+    if (_searchQuery.isEmpty) return news;
+    
+    return news.where((newsItem) =>
+      newsItem.title.toLowerCase().contains(_searchQuery) ||
+      newsItem.content.toLowerCase().contains(_searchQuery) ||
+      newsItem.author.toLowerCase().contains(_searchQuery) ||
+      newsItem.category.toLowerCase().contains(_searchQuery)
+    ).toList();
+  }
+
+  // Helper method to get dynamic section title
+  String _getSectionTitle() {
+    if (_searchQuery.isNotEmpty) {
+      return 'SEARCH RESULTS';
+    }
+    return _selectedFilter.toUpperCase();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await _firestoreService.getUserProfile();
+      if (mounted) {
+        setState(() {
+          _userProfile = profile;
+          _isLoadingProfile = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildHomeHeader() {
+    final isAuthenticated = _auth.currentUser != null;
+    
+    String userName;
+    String userLocation;
+    String? profileImageUrl;
+    
+    if (isAuthenticated) {
+      userName = _userProfile?['name'] ?? _auth.currentUser?.displayName ?? 'User';
+      userLocation = _userProfile?['location'] ?? 'Campus';
+      profileImageUrl = _userProfile?['profileImageUrl'] ?? _auth.currentUser?.photoURL;
+    } else {
+      userName = 'Visitor';
+      userLocation = 'Campus';
+      profileImageUrl = null;
+    }
+    
+    return HomeHeader(
+      userName: userName,
+      userLocation: userLocation,
+      profileImageUrl: profileImageUrl,
+      isAuthenticated: isAuthenticated,
+    );
+  }
 
 
   @override
@@ -95,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _bottomNavIndex = index;
           });
-          print('Bottom nav item tapped: $index');
+          // Bottom nav item tapped: $index
         },
       ),
     );
@@ -109,19 +206,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Home Header Component
-            const HomeHeader(
-              userName: 'Adonai Katy',
-              userLocation: 'Second floor, Playroom',
-              profileImageUrl: 'https://placehold.co/100x100/A0DCF0/FFFFFF?text=NP',
-            ),
+            // Home Header Component with dynamic user data
+            _isLoadingProfile
+                ? const Center(child: CircularProgressIndicator())
+                : _buildHomeHeader(),
             const SizedBox(height: 20),
 
             // Search Bar Component
             SearchBarWidget(
+              controller: _searchController,
               onFilterPressed: () {
                 // TODO: Implement filter functionality
-                print('Filter button pressed!');
+                  // Filter button pressed!
               },
             ),
             const SizedBox(height: 20),
@@ -138,15 +234,30 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Labs Section Component
-            LabsSection(
-              labs: _labsData,
-              onLabTap: (lab) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailsScreen(lab: lab),
-                  ),
+            // Labs Section Component with Firestore data
+            StreamBuilder<List<Lab>>(
+              stream: _labsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                final labs = snapshot.data ?? [];
+                final filteredLabs = _filterLabs(labs);
+                
+                return LabsSection(
+                  title: _getSectionTitle(),
+                  labs: filteredLabs,
+                  onLabTap: (lab) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailsScreen(lab: lab),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -163,11 +274,37 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
 
-            // News or Events List Component
-            NewsEventsList(
-              selectedTab: _selectedNewsEventsTab,
-              newsItems: _newsData,
-              eventItems: _eventsData,
+            // News or Events List Component with Firestore data
+            StreamBuilder<List<News>>(
+              stream: _newsStream,
+              builder: (context, newsSnapshot) {
+                return StreamBuilder<List<Event>>(
+                  stream: _eventsStream,
+                  builder: (context, eventsSnapshot) {
+                    if (newsSnapshot.connectionState == ConnectionState.waiting || 
+                        eventsSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    final news = newsSnapshot.data ?? [];
+                    final events = eventsSnapshot.data ?? [];
+                    final filteredNews = _filterNews(news);
+                    final filteredEvents = _filterEvents(events);
+                    
+                    return NewsEventsList(
+                      selectedTab: _selectedNewsEventsTab,
+                      newsItems: filteredNews,
+                      eventItems: filteredEvents,
+                      onEventRegistrationChanged: () {
+                        // Refresh the events stream when registration changes
+                        setState(() {
+                          // Trigger rebuild to refresh data
+                        });
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
