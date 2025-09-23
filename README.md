@@ -27,9 +27,9 @@ Get Universe on your Android device instantly! The app is fully built and ready 
 
 | Download Method | Description | File Size | Best For |
 |----------------|-------------|-----------|----------|
-| **🔗 Direct APK** | [Click to download APK](./build/app/outputs/flutter-apk/app-release.apk) | 52.8MB | Quick installation |
+| **🔗 GitHub Releases** | [Download from releases](https://github.com/g1kdo/universe/releases) | 52.8MB | Quick installation |
 | **📱 QR Code** | Scan QR code above for instant download | 52.8MB | Mobile users |
-| **☁️ GitHub Releases** | [Download from releases](https://github.com/g1kdo/universe/releases) | 52.8MB | Version history |
+| **🛠️ Build Yourself** | Clone repo and build APK locally | 52.8MB | Developers |
 
 #### **🎯 Quick Installation Steps**
 1. **Download APK**: Get the latest `app-release.apk` file
@@ -55,14 +55,13 @@ Get Universe on your Android device instantly! The app is fully built and ready 
 
 ## 📲 **Download Universe APK**
 
-### **🚀 Direct Download**
-[![Download APK](https://img.shields.io/badge/Download-Universe%20APK-brightgreen?style=for-the-badge&logo=android)](./build/app/outputs/flutter-apk/app-release.apk)
+### **🚀 Download Options**
 
 **📁 File**: `app-release.apk` (52.8MB)  
 **📱 Compatible**: Android 6.0+ (API level 23+)  
 **⏱️ Download Time**: ~2-5 minutes (depending on connection)
 
-> **📝 Note**: The APK is currently available locally in the repository. For public distribution, upload it to GitHub Releases following the instructions below.
+> **⚠️ Important**: The APK is not included in the repository (build files are gitignored). Choose one of the download methods below:
 
 ### **📱 QR Code Download**
 ![QR Code](https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/g1kdo/universe/releases)
@@ -74,18 +73,35 @@ Get Universe on your Android device instantly! The app is fully built and ready 
 #### **GitHub Releases**
 [![GitHub Release](https://img.shields.io/badge/GitHub-Release-blue?style=flat-square&logo=github)](https://github.com/g1kdo/universe/releases)
 
-#### **Direct File Access**
+#### **Build APK Yourself**
 ```bash
-# Clone repository and access APK
+# Clone repository and build APK
 git clone https://github.com/g1kdo/universe.git
 cd universe
-# APK location: ./build/app/outputs/flutter-apk/app-release.apk
+
+# Install dependencies
+flutter pub get
+
+# Build the APK
+flutter build apk --release
+
+# APK will be created at: ./build/app/outputs/flutter-apk/app-release.apk
 ```
 
-#### **📋 Setting Up GitHub Releases (For Developers)**
-To make the APK easily downloadable via GitHub releases:
+#### **📋 Current Status & Next Steps**
 
-1. **Create a Release**:
+**✅ What's Ready:**
+- APK successfully built (52.8MB)
+- All features working (Image Upload, Lost & Found, Club Management)
+- Repository contains all source code
+
+**⚠️ What's Missing:**
+- APK not publicly available (build files are gitignored)
+- No GitHub release created yet
+
+**🚀 To Make APK Publicly Available:**
+
+1. **Create a GitHub Release**:
    ```bash
    # Tag the current version
    git tag -a v2.0 -m "Universe v2.0 with Image Upload"
@@ -99,9 +115,10 @@ To make the APK easily downloadable via GitHub releases:
    - Upload `build/app/outputs/flutter-apk/app-release.apk`
    - Publish the release
 
-3. **Update Download Links**:
-   - The direct download link will be: `https://github.com/g1kdo/universe/releases/download/v2.0/app-release.apk`
-   - Update the README download links to point to this URL
+3. **Result**:
+   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v2.0/app-release.apk`
+   - QR code will work for public downloads
+   - Users can download without building
 
 ---
 
