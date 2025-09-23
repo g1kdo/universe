@@ -17,11 +17,11 @@ class VrNavigationOverlay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha:0.95),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha:0.3),
             spreadRadius: 2,
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -44,7 +44,7 @@ class VrNavigationOverlay extends StatelessWidget {
                       color: Colors.blue[700],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.pause, color: Colors.white, size: 24),
+                    child: Icon(Icons.pause, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 10),
                   const Text(

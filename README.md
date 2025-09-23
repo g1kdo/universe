@@ -69,6 +69,12 @@ To create a seamless digital ecosystem that connects students with their campus,
 | **Interactive Location Cards** | Detailed information for each tour stop | Dynamic Content Loading |
 | **Tour Customization** | Personalized tour routes and preferences | User Preferences, Custom Routes |
 
+### ⚙️ **Settings & Preferences**
+| Feature | Description | Tech Stack |
+|---------|-------------|------------|
+| **Theme Management** | Light/Dark/System theme switching | SharedPreferences, Riverpod |
+| **User Preferences** | Persistent app settings and configurations | Local Storage, State Management |
+
 ### 👤 **Advanced User Management**
 | Feature | Description | Tech Stack |
 |---------|-------------|------------|
@@ -76,6 +82,7 @@ To create a seamless digital ecosystem that connects students with their campus,
 | **Guest Mode** | Limited access for non-registered users | Conditional UI, Feature Gating |
 | **Profile Management** | Comprehensive user profiles with statistics | Firestore, Custom Profile Models |
 | **Role-based Access** | Admin, organizer, and student roles | Custom Claims, Permission System |
+| **Dark Mode Support** | Persistent theme switching with system integration | SharedPreferences, Riverpod State Management |
 
 ---
 
@@ -94,6 +101,8 @@ lib/
 ├── services/                  # Business logic and API services
 │   ├── auth_service.dart     # Authentication management
 │   └── firestore_service.dart # Database operations
+├── providers/                 # State management providers
+│   └── theme.dart            # Theme management with SharedPreferences
 ├── ui/                       # User interface layer
 │   ├── components/           # Reusable UI components
 │   │   ├── cards/           # Card components (events, labs, etc.)
@@ -115,6 +124,8 @@ lib/
 - **StatefulWidget**: Local state management for UI interactions
 - **FutureBuilder**: Asynchronous data loading and caching
 - **Custom Controllers**: Form and animation controllers
+- **Riverpod**: Advanced state management for theme and user preferences
+- **SharedPreferences**: Persistent local storage for user settings
 
 ### 🗄️ **Database Architecture**
 - **Firestore**: NoSQL database for real-time data synchronization
@@ -158,6 +169,7 @@ permission_handler: ^11.0.1
 # Utilities
 intl: ^0.19.0
 dio: ^5.8.0+1
+shared_preferences: ^2.5.3
 ```
 
 ### 🏃 **Quick Start**
@@ -199,6 +211,137 @@ flutter run
 2. Add your university's lab and facility data to Firestore
 3. Customize event categories and club types
 4. Configure admin roles and permissions
+
+---
+
+## 🌙 Dark Mode & Theme Management
+
+### 🎨 **Advanced Theme System**
+Universe features a comprehensive dark mode implementation with persistent theme preferences:
+
+- **Three Theme Modes**: Light, Dark, and System (follows device settings)
+- **Persistent Storage**: Theme preferences saved using SharedPreferences
+- **Smooth Transitions**: Seamless theme switching with Material Design 3
+- **System Integration**: Automatically follows device dark mode settings
+- **Custom Color Schemes**: Carefully crafted light and dark color palettes
+
+### 🔧 **Theme Implementation Details**
+```dart
+// Theme Provider with Riverpod
+final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
+  return ThemeNotifier();
+});
+
+// Persistent theme storage
+class ThemeNotifier extends StateNotifier<ThemeMode> {
+  Future<void> setTheme(ThemeMode theme) async {
+    state = theme;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('theme_mode', theme.index);
+  }
+}
+```
+
+### 🎯 **Theme Features**
+- **Automatic Detection**: Detects system theme changes in real-time
+- **User Control**: Manual theme switching in Settings screen
+- **Consistent Design**: All components adapt seamlessly to theme changes
+- **Performance Optimized**: Efficient theme switching without app restart
+
+---
+
+## 📱 APK Installation & Distribution
+
+### 🚀 **Building the APK**
+
+#### **Prerequisites for Building**
+- Ensure you have sufficient disk space (at least 2GB free)
+- Flutter SDK properly configured
+- Android SDK and build tools installed
+- Valid signing configuration (for release builds)
+
+#### **Build Commands**
+```bash
+# Debug APK (smaller, faster build)
+flutter build apk --debug
+
+# Release APK (optimized, production-ready)
+flutter build apk --release
+
+# Split APKs by architecture (smaller individual files)
+flutter build apk --split-per-abi
+```
+
+#### **APK Location**
+After successful build, find your APK at:
+```
+build/app/outputs/flutter-apk/
+├── app-debug.apk          # Debug version
+├── app-release.apk        # Release version
+└── app-armeabi-v7a-release.apk  # Architecture-specific builds
+```
+
+### 📲 **Installing on Real Devices**
+
+#### **Method 1: Direct Installation**
+1. **Enable Developer Options** on your Android device:
+   - Go to Settings > About Phone
+   - Tap "Build Number" 7 times
+   - Go back to Settings > Developer Options
+   - Enable "USB Debugging"
+
+2. **Connect Device** via USB cable
+
+3. **Install APK**:
+   ```bash
+   # Install debug APK
+   flutter install
+   
+   # Or install specific APK file
+   adb install build/app/outputs/flutter-apk/app-debug.apk
+   ```
+
+#### **Method 2: File Transfer**
+1. **Copy APK** to your device storage
+2. **Enable Unknown Sources**:
+   - Settings > Security > Install Unknown Apps
+   - Allow installation from your file manager
+3. **Tap APK file** to install
+
+#### **Method 3: QR Code Distribution**
+For easy sharing, you can:
+1. Upload APK to cloud storage (Google Drive, Dropbox)
+2. Generate QR code with the download link
+3. Share QR code for easy installation
+
+### ⚠️ **Important Notes**
+- **Debug APKs** are larger but include debugging information
+- **Release APKs** are optimized and smaller for distribution
+- **First Installation**: May take longer due to dependency downloads
+- **Storage Requirements**: App requires ~50-100MB of device storage
+- **Permissions**: App will request necessary permissions on first launch
+
+### 🚨 **Current Build Status**
+**Note**: Due to disk space constraints during development, the APK build process encountered issues. To build the APK successfully:
+
+1. **Free up disk space** (at least 2GB recommended)
+2. **Clean build cache**: `flutter clean`
+3. **Try debug build first**: `flutter build apk --debug` (smaller size)
+4. **Alternative**: Use `flutter run` for direct device testing
+
+### 📋 **Quick APK Build Checklist**
+- [ ] Ensure 2GB+ free disk space
+- [ ] Run `flutter clean` to clear cache
+- [ ] Verify Android SDK is properly configured
+- [ ] Connect Android device or start emulator
+- [ ] Run `flutter build apk --debug` for testing
+- [ ] Run `flutter build apk --release` for distribution
+
+### 🔒 **Security Considerations**
+- APK files are not signed for distribution (development builds)
+- For production distribution, configure proper app signing
+- Consider using Google Play Store for official distribution
+- Test thoroughly on different devices and Android versions
 
 ---
 

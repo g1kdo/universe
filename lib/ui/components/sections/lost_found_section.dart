@@ -147,7 +147,7 @@ class _LostFoundSectionState extends State<LostFoundSection> {
               // TODO: Implement report item functionality
               print('Report Item button pressed!');
             },
-            icon: const Icon(Icons.add_circle_outline),
+            icon: Icon(Icons.add_circle_outline, color: Theme.of(context).colorScheme.primary),
             label: const Text('Report an Item'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,

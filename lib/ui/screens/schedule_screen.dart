@@ -1,43 +1,47 @@
 // lib/ui/screens/schedule_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:universe/ui/components/cards/schedule_card.dart';
 import 'package:universe/services/firestore_service.dart';
 import 'package:universe/models/user_schedule_model.dart';
 
-class ScheduleScreen extends StatefulWidget {
+class ScheduleScreen extends ConsumerStatefulWidget {
   const ScheduleScreen({super.key});
 
   @override
-  State<ScheduleScreen> createState() => _ScheduleScreenState();
+  ConsumerState<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   DateTime _selectedDate = DateTime.now();
   final List<String> _daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   final FirestoreService _firestoreService = FirestoreService();
 
   Color _getEventColor(String category) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     switch (category.toLowerCase()) {
       case 'academic':
-        return const Color(0xFFD9F7D4); // Light Green
+        return isDark ? const Color(0xFF2D4A2D) : const Color(0xFFD9F7D4); // Dark/Light Green
       case 'sports':
-        return const Color(0xFFE8F5E8); // Light Green
+        return isDark ? const Color(0xFF2D4A2D) : const Color(0xFFE8F5E8); // Dark/Light Green
       case 'cultural':
-        return const Color(0xFFF3E5F5); // Light Purple
+        return isDark ? const Color(0xFF4A2D4A) : const Color(0xFFF3E5F5); // Dark/Light Purple
       case 'social':
-        return const Color(0xFFFFF9C4); // Light Yellow
+        return isDark ? const Color(0xFF4A4A2D) : const Color(0xFFFFF9C4); // Dark/Light Yellow
       case 'workshop':
-        return const Color(0xFFE3F2FD); // Light Blue
+        return isDark ? const Color(0xFF2D3A4A) : const Color(0xFFE3F2FD); // Dark/Light Blue
       case 'conference':
-        return const Color(0xFFD3E0EA); // Light Blue/Gray
+        return isDark ? const Color(0xFF3A3A3A) : const Color(0xFFD3E0EA); // Dark/Light Blue/Gray
       default:
-        return const Color(0xFFF5F5F5); // Light Gray
+        return isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5); // Dark/Light Gray
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -55,16 +59,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   //     Navigator.pop(context);
                   //   },
                   // ),
-                  const Text(
+                  Text(
                     'Schedule',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Colors.black87),
+                    icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurface),
                     onPressed: () {
                       // TODO: Handle notifications
                     },
@@ -84,10 +88,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     children: [
                       Text(
                         DateFormat('dd').format(_selectedDate), // Day number
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -98,14 +102,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             DateFormat('EEE').format(_selectedDate), // Mon, Tue, etc.
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[700],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                           Text(
                             DateFormat('MMMM,yyyy').format(_selectedDate), // July, 2024
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[700],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -117,7 +121,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   Container(
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0), // Light grey background for the date row
+                      color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF0F0F0), // Dark/Light grey background for the date row
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Row(
@@ -136,7 +140,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                             width: 45,
                             height: 60,
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFC9A0DC) : Colors.transparent, // Purple if selected
+                              color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent, // Primary color if selected
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
@@ -147,7 +151,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -156,7 +160,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -177,31 +181,31 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 stream: _firestoreService.getUserScheduleForDate(_selectedDate),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
                   }
                   
                   if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)));
                   }
                   
                   final scheduleItems = snapshot.data ?? [];
                   
                   if (scheduleItems.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.event_busy,
                             size: 64,
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
                             'No events scheduled for this date',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -225,17 +229,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 children: [
                                   Text(
                                     event.time,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
-                                      color: Colors.black87,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                     ),
                                   ),
                                   Text(
                                     'Event',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                     ),
                                   ),
                                 ],

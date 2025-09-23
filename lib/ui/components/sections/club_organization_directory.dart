@@ -56,7 +56,7 @@ class ClubCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 18),
+              Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6), size: 18),
             ],
           ),
         ),
@@ -117,7 +117,7 @@ class ClubOrganizationDirectory extends StatelessWidget {
               // TODO: Implement register club functionality
               print('Register Your Club button pressed!');
             },
-            icon: const Icon(Icons.group_add),
+            icon: Icon(Icons.group_add, color: Theme.of(context).colorScheme.primary),
             label: const Text('Register Your Club'),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.deepPurple,

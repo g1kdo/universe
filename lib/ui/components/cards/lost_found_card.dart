@@ -100,19 +100,19 @@ class LostFoundCard extends StatelessWidget {
                   if (isOwner && !item.isResolved) ...[
                     if (onEdit != null)
                       IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
+                        icon: Icon(Icons.edit, size: 20, color: Theme.of(context).colorScheme.onSurface),
                         onPressed: onEdit,
                         tooltip: 'Edit',
                       ),
                     if (onResolve != null)
                       IconButton(
-                        icon: const Icon(Icons.check_circle, size: 20, color: Colors.green),
+                        icon: Icon(Icons.check_circle, size: 20, color: Colors.green),
                         onPressed: onResolve,
                         tooltip: 'Mark as Resolved',
                       ),
                     if (onDelete != null)
                       IconButton(
-                        icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                        icon: Icon(Icons.delete, size: 20, color: Colors.red),
                         onPressed: onDelete,
                         tooltip: 'Delete',
                       ),

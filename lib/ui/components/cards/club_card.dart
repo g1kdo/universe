@@ -123,7 +123,7 @@ class ClubCard extends StatelessWidget {
                             onTap: onEdit,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              child: const Icon(Icons.edit, size: 14, color: Colors.grey),
+                              child: Icon(Icons.edit, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                             ),
                           ),
                         if (onDelete != null) ...[
@@ -132,7 +132,7 @@ class ClubCard extends StatelessWidget {
                             onTap: onDelete,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              child: const Icon(Icons.delete, size: 14, color: Colors.red),
+                              child: Icon(Icons.delete, size: 14, color: Colors.red),
                             ),
                           ),
                         ],

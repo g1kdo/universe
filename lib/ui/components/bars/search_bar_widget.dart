@@ -20,15 +20,18 @@ class SearchBarWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha:0.3)),
             ),
             child: TextField(
               controller: controller,
-              decoration: const InputDecoration(
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              decoration: InputDecoration(
                 hintText: 'Search by name, type..',
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                 border: InputBorder.none,
-                icon: Icon(Icons.search, color: Colors.grey),
+                icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
               ),
             ),
           ),
@@ -38,11 +41,11 @@ class SearchBarWidget extends StatelessWidget {
           onTap: onFilterPressed,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.blueAccent,
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.all(12),
-            child: const Icon(Icons.filter_list, color: Colors.white),
+            child: Icon(Icons.filter_list, color: Theme.of(context).colorScheme.onPrimary),
           ),
         ),
       ],

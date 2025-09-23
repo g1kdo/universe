@@ -25,9 +25,7 @@ class NewsEventsList extends StatelessWidget {
     if (selectedTab == 'News') {
       return Column(
         children: newsItems.map((news) => NewsCard(
-          title: news.title,
-          content: news.content,
-          date: news.publishedAt.toString().split(' ')[0], // Format date
+          news: news,
         )).toList(),
       );
     } else {

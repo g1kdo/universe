@@ -34,15 +34,15 @@ class FilterChipsSection extends StatelessWidget {
                   onFilterSelected(label);
                 }
               },
-              selectedColor: Colors.blueAccent,
+              selectedColor: Theme.of(context).colorScheme.primary,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
-              backgroundColor: Colors.grey[200],
+              backgroundColor: Theme.of(context).colorScheme.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: BorderSide.none,
+                side: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha:0.3)),
               ),
             ),
           );

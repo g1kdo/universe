@@ -346,15 +346,15 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             flexibleSpace: FlexibleSpaceBar(
               // title: const Text(
               //   'Community',

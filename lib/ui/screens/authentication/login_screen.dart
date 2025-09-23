@@ -1,19 +1,20 @@
 // lib/ui/screens/login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/ui/components/bars/custom_text_field.dart';
 import 'package:universe/ui/components/custom_elevated_button.dart';
 import 'package:universe/ui/screens/authentication/signup_screen.dart'; // For navigation to signup
 import 'package:universe/ui/screens/home_screen.dart'; // For navigation to home
 import 'package:universe/services/auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -117,16 +118,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
         // Background gradient from welcome/home screen
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF89CFF0), // Light Blue
-              Color(0xFFC9A0DC), // Light Purple
+            colors: isDark ? [
+              const Color(0xFF1a1a2e), // Dark Blue
+              const Color(0xFF16213e), // Darker Blue
+              const Color(0xFF0f3460), // Darkest Blue
+            ] : [
+              const Color(0xFF89CFF0), // Light Blue
+              const Color(0xFFC9A0DC), // Light Purple
             ],
           ),
         ),
@@ -142,20 +149,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 50), // Space from the very top
 
                   // Welcome Back Text
-                  const Text(
+                  Text(
                     'Welcome Back!',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Sign in to continue!',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.black54,
+                      color: isDark ? Colors.white.withValues(alpha:0.8) : Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -167,8 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       text: 'Log in with Google',
                       // Use imageIcon instead of icon for Google logo
                       imageIcon: const AssetImage('assets/images/google.png'),
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black87,
+                      backgroundColor: isDark ? Colors.white.withValues(alpha:0.9) : Colors.white,
+                      textColor: isDark ? Colors.black : Colors.black87,
                       // For image assets, iconColor might tint the image.
                       // If your Google logo is already colored, you might remove iconColor.
                       // iconColor: Colors.red[700],
@@ -179,10 +186,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 30),
 
                   // OR Divider
-                  const Text(
+                  Text(
                     'OR',
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: isDark ? Colors.white.withValues(alpha:0.7) : Colors.black54,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -238,9 +245,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: _isLoading ? null : _forgotPassword,
-                      child: const Text(
+                      child: Text(
                         'Forgot password?',
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: isDark ? Colors.white.withValues(alpha:0.7) : Colors.black54),
                       ),
                     ),
                   ),
@@ -250,9 +257,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Don't have an account? ",
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: isDark ? Colors.white.withValues(alpha:0.7) : Colors.black54),
                       ),
                       GestureDetector(
                         onTap: _isLoading ? null : () {
@@ -261,10 +268,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             MaterialPageRoute(builder: (context) => const SignupScreen()),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Sign Up',
                           style: TextStyle(
-                            color: Colors.blueAccent, // Use blue accent for link
+                            color: isDark ? Colors.blue[300] : Colors.blueAccent, // Use blue accent for link
                             fontWeight: FontWeight.bold,
                           ),
                         ),

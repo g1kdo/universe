@@ -1,5 +1,6 @@
 // lib/ui/screens/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/ui/components/cards/profile_stat_card.dart';
 import 'package:universe/ui/components/dashboard_option_tile.dart';
 import 'package:universe/services/auth_service.dart';
@@ -8,14 +9,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:universe/ui/screens/welcome_screen.dart';
 import 'package:universe/ui/screens/authentication/login_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final AuthService _authService = AuthService();
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -126,28 +127,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha:0.3)),
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.grey[300],
+            backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha:0.3),
             child: Icon(
               Icons.person,
               size: 40,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Guest User',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -155,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Sign in to access your profile and statistics',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -163,8 +164,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: _navigateToLogin,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
             child: const Text('Sign In'),
@@ -194,16 +193,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //     Navigator.pop(context);
                   //   },
                   // ),
-                  const Text(
+                  Text(
                     'Profile',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.notifications_none, color: Colors.black87),
+                    icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurface),
                     onPressed: () {
                       // TODO: Handle notifications
                     },
@@ -246,10 +245,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Text(
                               userName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -257,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               userEmail,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -265,7 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               'Student',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.blue[600],
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -283,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0F0F0),
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Column(
@@ -293,20 +292,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ProfileStatCard(
                             value: '$_eventsAttended',
                             label: 'Events Attended',
-                            backgroundColor: Colors.white,
-                          ),
-                          const SizedBox(width: 16),
-                          ProfileStatCard(
-                            value: '$_clubsJoined',
-                            label: 'Clubs Joined',
-                            backgroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                           ),
                           const SizedBox(width: 16),
                           ProfileStatCard(
                             value: '$_itemsLost',
                             label: 'Items Lost',
-                            backgroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                           ),
+                          const SizedBox(width: 16),
+                          ProfileStatCard(
+                            value: '$_clubsJoined',
+                            label: 'Clubs Joined',
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          ),
+                         // const SizedBox(width: 16),
+                          
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -318,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -334,8 +335,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Icon(Icons.event_note, size: 30, color: Colors.orange[700]),
                                 ),
                                 const SizedBox(height: 5),
-                                Text('Event Check-ins', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                                Text('${(_eventCheckInRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                Text('Event Check-ins', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7))),
+                                Text('${(_eventCheckInRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                               ],
                             ),
                           ),
@@ -348,8 +349,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Icon(Icons.group_add, size: 30, color: Colors.green[700]),
                                 ),
                                 const SizedBox(height: 5),
-                                Text('Club Participation', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                                Text('${(_clubParticipationRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                Text('Club Participation', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7))),
+                                Text('${(_clubParticipationRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                               ],
                             ),
                           ),
@@ -362,8 +363,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Icon(Icons.location_on, size: 30, color: Colors.blue[700]),
                                 ),
                                 const SizedBox(height: 5),
-                                Text('Campus Exploration', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-                                Text('${(_campusExplorationRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                Text('Campus Exploration', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7))),
+                                Text('${(_campusExplorationRate * 100).toInt()}%', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                               ],
                             ),
                           ),
@@ -377,12 +378,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // --- Dashboard Section ---
               if (_auth.currentUser != null) ...[
-                const Text(
+                Text(
                   'Dashboard',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -413,12 +414,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: _logout,
                 ),
               ] else ...[
-                const Text(
+                Text(
                   'Account Options',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 15),

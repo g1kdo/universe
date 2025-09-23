@@ -26,26 +26,26 @@ class HomeHeader extends StatelessWidget {
           children: [
             Text(
               'Welcome, $userName!',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                Icon(Icons.location_on, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                 const SizedBox(width: 4),
                 Text(
                   userLocation,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                   ),
                 ),
                 if (isAuthenticated)
-                  const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
+                  Icon(Icons.keyboard_arrow_down, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
               ],
             ),
             if (!isAuthenticated) ...[
@@ -54,7 +54,7 @@ class HomeHeader extends StatelessWidget {
                 'Sign in to access all features',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.blue[600],
+                  color: Theme.of(context).colorScheme.primary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -65,7 +65,7 @@ class HomeHeader extends StatelessWidget {
           radius: 25,
           backgroundImage: profileImageUrl != null ? NetworkImage(profileImageUrl!) : null,
           child: profileImageUrl == null 
-            ? const Icon(Icons.person, size: 25, color: Colors.grey)
+            ? Icon(Icons.person, size: 25, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6))
             : null,
         ),
       ],

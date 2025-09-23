@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/ui/screens/authentication/login_screen.dart';
 import 'package:universe/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -51,14 +52,14 @@ class UniVerseVClipper extends CustomClipper<Path> {
 }
 
 
-class WelcomeScreen extends StatefulWidget {
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateMixin {
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with TickerProviderStateMixin {
   // Controller for the UV logo falling animation
   late AnimationController _logoAnimationController;
   // Animation for the 'U' shape's position (slide from top-left)
@@ -171,17 +172,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     // Show a blank container or loading indicator until animations are initialized.
     // This prevents accessing uninitialized 'late' variables during the very first build.
     if (!_animationsInitialized) {
       return Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF89CFF0), // Light Blue
-              Color(0xFFC9A0DC), // Light Purple
+            colors: isDark ? [
+              const Color(0xFF1a1a2e), // Dark Blue
+              const Color(0xFF16213e), // Darker Blue
+              const Color(0xFF0f3460), // Darkest Blue
+            ] : [
+              const Color(0xFF89CFF0), // Light Blue
+              const Color(0xFFC9A0DC), // Light Purple
             ],
           ),
         ),
@@ -190,13 +197,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF89CFF0), // Light Blue
-              Color(0xFFC9A0DC), // Light Purple
+            colors: isDark ? [
+              const Color(0xFF1a1a2e), // Dark Blue
+              const Color(0xFF16213e), // Darker Blue
+              const Color(0xFF0f3460), // Darkest Blue
+            ] : [
+              const Color(0xFF89CFF0), // Light Blue
+              const Color(0xFFC9A0DC), // Light Purple
             ],
           ),
         ),
@@ -220,7 +231,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                         child: Container(
                           width: 100, // Size of the 'U' shape
                           height: 100,
-                          color: Colors.white, // Color of the 'U' shape
+                          color: isDark ? Colors.white : Colors.white, // Color of the 'U' shape
                         ),
                       ),
                     ),
@@ -232,7 +243,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                         child: Container(
                           width: 90, // Slightly larger V for better visual balance when upside down
                           height: 90,
-                          color: Colors.black, // Color of the 'V' shape
+                          color: isDark ? Colors.black : Colors.black, // Color of the 'V' shape
                         ),
                       ),
                     ),
@@ -245,10 +256,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
               // FadeTransition makes the text appear smoothly after the logo animation
               FadeTransition(
                 opacity: _textButtonsOpacityAnimation,
-                child: const Text(
+                child: Text(
                   'Welcome to UniVerse',
                   style: TextStyle(
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -269,8 +280,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // White background for the button
-                    foregroundColor: Colors.black, // Black text/icon color
+                    backgroundColor: isDark ? Colors.white.withValues(alpha:0.9) : Colors.white, // White background for the button
+                    foregroundColor: isDark ? Colors.black : Colors.black, // Black text/icon color
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30), // More rounded button
@@ -305,8 +316,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black, // Black text/icon color
-                    side: const BorderSide(color: Colors.white, width: 2), // White border
+                    foregroundColor: isDark ? Colors.white : Colors.black, // Black text/icon color
+                    side: BorderSide(color: isDark ? Colors.white.withValues(alpha:0.8) : Colors.white, width: 2), // White border
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

@@ -45,7 +45,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         hintText: widget.hintText,
         hintStyle: TextStyle(color: Colors.grey[600]),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.9), // Slightly transparent white background
+        fillColor: Colors.white.withValues(alpha:0.9), // Slightly transparent white background
         contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

@@ -46,7 +46,7 @@ class ScheduleCard extends StatelessWidget {
                   ),
                 ),
                 if (showNotification)
-                  const Icon(Icons.more_vert, color: Colors.black54), // More options icon
+                  Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)), // More options icon
               ],
             ),
             const SizedBox(height: 4),
@@ -62,7 +62,7 @@ class ScheduleCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.black54),
+                Icon(Icons.location_on, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                 const SizedBox(width: 4),
                 Expanded(
                   flex: 1,
@@ -74,7 +74,7 @@ class ScheduleCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Icon(Icons.person, size: 16, color: Colors.black54),
+                Icon(Icons.person, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                 const SizedBox(width: 4),
                 Expanded(
                   flex: 1,

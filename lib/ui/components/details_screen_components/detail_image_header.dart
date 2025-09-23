@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/models/lab_model.dart';
 
-class DetailImageHeader extends StatelessWidget {
+class DetailImageHeader extends ConsumerWidget {
   final Lab lab;
 
   const DetailImageHeader({super.key, required this.lab});
@@ -45,7 +46,7 @@ class DetailImageHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final labIcon = _getLabIcon(lab.category);
     final labColor = _getLabColor(lab.category);
 
@@ -72,13 +73,13 @@ class DetailImageHeader extends StatelessWidget {
                 Icon(
                   labIcon,
                   size: 80,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -93,8 +94,8 @@ class DetailImageHeader extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   lab.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -106,14 +107,14 @@ class DetailImageHeader extends StatelessWidget {
         ),
       ),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
         onPressed: () {
           Navigator.pop(context);
         },
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.share, color: Colors.white),
+          icon: Icon(Icons.share, color: Theme.of(context).colorScheme.onPrimary),
           onPressed: () {
             // TODO: Implement share functionality
             // Share button pressed!

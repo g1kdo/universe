@@ -1,19 +1,20 @@
 // lib/ui/screens/signup_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/ui/components/bars/custom_text_field.dart';
 import 'package:universe/ui/components/custom_elevated_button.dart';
 import 'package:universe/ui/screens/authentication/login_screen.dart'; // For navigation to login
 import 'package:universe/ui/screens/home_screen.dart'; // For navigation to home
 import 'package:universe/services/auth_service.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -104,16 +105,22 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
         // Background gradient from welcome/home screen
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF89CFF0), // Light Blue
-              Color(0xFFC9A0DC), // Light Purple
+            colors: isDark ? [
+              const Color(0xFF1a1a2e), // Dark Blue
+              const Color(0xFF16213e), // Darker Blue
+              const Color(0xFF0f3460), // Darkest Blue
+            ] : [
+              const Color(0xFF89CFF0), // Light Blue
+              const Color(0xFFC9A0DC), // Light Purple
             ],
           ),
         ),
@@ -129,20 +136,20 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 50), // Space from the very top
 
                   // Create Account Text
-                  const Text(
+                  Text(
                     'Create Account',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Sign up to get started!',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.black54,
+                      color: isDark ? Colors.white.withValues(alpha:0.8) : Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -153,8 +160,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: CustomElevatedButton(
                       text: 'Sign up with Google',
                       imageIcon: const AssetImage('assets/images/google.png'),
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black87,
+                      backgroundColor: isDark ? Colors.white.withValues(alpha:0.9) : Colors.white,
+                      textColor: isDark ? Colors.black : Colors.black87,
                       iconSize: 35.0,
                       onPressed: _isLoading ? null : _signupWithGoogle,
                     ),
@@ -162,10 +169,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 30),
 
                   // OR Divider
-                  const Text(
+                  Text(
                     'OR',
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: isDark ? Colors.white.withValues(alpha:0.7) : Colors.black54,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -249,9 +256,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Already have an account? ",
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: isDark ? Colors.white.withValues(alpha:0.7) : Colors.black54),
                       ),
                       GestureDetector(
                         onTap: _isLoading ? null : () {
@@ -260,10 +267,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             MaterialPageRoute(builder: (context) => const LoginScreen()),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Login',
                           style: TextStyle(
-                            color: Colors.blueAccent, // Use blue accent for link
+                            color: isDark ? Colors.blue[300] : Colors.blueAccent, // Use blue accent for link
                             fontWeight: FontWeight.bold,
                           ),
                         ),

@@ -30,7 +30,7 @@ class NewsEventsTabs extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: selectedTab == tabName ? Colors.black : Colors.grey,
+                    color: selectedTab == tabName ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                   ),
                 ),
                 if (selectedTab == tabName)
@@ -39,7 +39,7 @@ class NewsEventsTabs extends StatelessWidget {
                     height: 3,
                     // Dynamic width based on text length or a fixed minimum
                     width: tabName.length * 10.0 + 10, // A simple way to approximate width
-                    color: Colors.deepPurple, // Using a consistent accent color
+                    color: Theme.of(context).colorScheme.primary, // Using theme primary color
                   ),
               ],
             ),

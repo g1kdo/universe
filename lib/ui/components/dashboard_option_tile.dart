@@ -18,20 +18,20 @@ class DashboardOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
-      color: Colors.white, // White background for dashboard options
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 2,
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF957DAD)), // Purple icon
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
         onTap: onTap,
       ),
     );

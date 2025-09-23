@@ -106,9 +106,10 @@ class LabCard extends StatelessWidget {
                 children: [
                   Text(
                     lab.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -119,14 +120,14 @@ class LabCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           lab.floor,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                             fontSize: 14,
                           ),
                         ),
@@ -139,14 +140,14 @@ class LabCard extends StatelessWidget {
                       Icon(
                         Icons.people,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           lab.accommodation,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                             fontSize: 12,
                           ),
                         ),

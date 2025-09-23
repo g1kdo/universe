@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/models/lab_model.dart';
 import 'package:universe/services/firestore_service.dart';
 
-class VirtualRealityTourScreen extends StatefulWidget {
+class VirtualRealityTourScreen extends ConsumerStatefulWidget {
   const VirtualRealityTourScreen({super.key});
 
   @override
-  State<VirtualRealityTourScreen> createState() => _VirtualRealityTourScreenState();
+  ConsumerState<VirtualRealityTourScreen> createState() => _VirtualRealityTourScreenState();
 }
 
-class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
+class _VirtualRealityTourScreenState extends ConsumerState<VirtualRealityTourScreen>
     with TickerProviderStateMixin {
   final FirestoreService _firestoreService = FirestoreService();
   late AnimationController _animationController;
@@ -115,22 +116,27 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1a1a2e),
-              Color(0xFF16213e),
-              Color(0xFF0f3460),
+            colors: isDark ? [
+              const Color(0xFF1a1a2e),
+              const Color(0xFF16213e),
+              const Color(0xFF0f3460),
+            ] : [
+              const Color(0xFF89CFF0),
+              const Color(0xFFC9A0DC),
             ],
           ),
         ),
         child: SafeArea(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+              ? Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary))
               : _buildTourContent(),
         ),
       ),
@@ -139,10 +145,10 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
 
   Widget _buildTourContent() {
     if (_tourLocations.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No tour locations available',
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 18),
         ),
       );
     }
@@ -155,26 +161,39 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Virtual Campus Tour',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Text(
+                    'Virtual Campus Tour',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               if (_isPlaying)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.2),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.green),
+                    border: Border.all(color: Theme.of(context).colorScheme.primary),
                   ),
-                  child: const Text(
+                  child: Text(
                     'LIVE',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -190,7 +209,7 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
             margin: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha:0.3)),
+              border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha:0.3)),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
@@ -203,8 +222,8 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.blue.withValues(alpha:0.3),
-                          Colors.purple.withValues(alpha:0.3),
+                          Theme.of(context).colorScheme.primary.withValues(alpha:0.3),
+                          Theme.of(context).colorScheme.secondary.withValues(alpha:0.3),
                         ],
                       ),
                     ),
@@ -215,13 +234,13 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                           Icon(
                             Icons.view_in_ar,
                             size: 80,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                           const SizedBox(height: 20),
                           Text(
                             '360° Virtual View',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
                             ),
@@ -244,7 +263,7 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha:0.7),
+                              color: Theme.of(context).colorScheme.surface.withValues(alpha:0.7),
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Column(
@@ -254,15 +273,15 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                                   children: [
                                     Icon(
                                       _getLocationIcon(_tourLocations[_currentTourIndex].category),
-                                      color: Colors.white,
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       size: 24,
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
                                         _tourLocations[_currentTourIndex].name,
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onSurface,
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -274,7 +293,7 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                                 Text(
                                   _tourLocations[_currentTourIndex].description,
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                                     fontSize: 14,
                                   ),
                                   maxLines: 2,
@@ -285,14 +304,14 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                                   children: [
                                     Icon(
                                       Icons.location_on,
-                                      color: Colors.white.withValues(alpha: 0.7),
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                       size: 16,
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
                                       '${_tourLocations[_currentTourIndex].floor} - ${_tourLocations[_currentTourIndex].accommodation}',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.7),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -318,15 +337,15 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                             children: [
                               Text(
                                 'Location ${_currentTourIndex + 1} of ${_tourLocations.length}',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 '${((_currentTourIndex + 1) / _tourLocations.length * 100).round()}%',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -336,8 +355,8 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                           const SizedBox(height: 8),
                           LinearProgressIndicator(
                             value: (_currentTourIndex + 1) / _tourLocations.length,
-                            backgroundColor: Colors.white.withValues(alpha:0.3),
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                            backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                           ),
                         ],
                       ),
@@ -363,8 +382,8 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Start Tour'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                     )
@@ -374,8 +393,8 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                       icon: const Icon(Icons.pause),
                       label: const Text('Pause'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                     ),
@@ -384,8 +403,8 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                       icon: const Icon(Icons.stop),
                       label: const Text('End Tour'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                     ),
@@ -421,17 +440,17 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                         child: Container(
                           decoration: BoxDecoration(
                             color: isActive
-                                ? Colors.blue.withValues(alpha:0.3)
+                                ? Theme.of(context).colorScheme.primary.withValues(alpha:0.3)
                                 : isCompleted
-                                    ? Colors.green.withValues(alpha:0.3)
-                                    : Colors.white.withValues(alpha:0.1),
+                                    ? Theme.of(context).colorScheme.primary.withValues(alpha:0.3)
+                                    : Theme.of(context).colorScheme.onSurface.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isActive
-                                  ? Colors.blue
+                                  ? Theme.of(context).colorScheme.primary
                                   : isCompleted
-                                      ? Colors.green
-                                      : Colors.white.withValues(alpha:0.3),
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha:0.3),
                               width: 2,
                             ),
                           ),
@@ -441,10 +460,10 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                               Icon(
                                 _getLocationIcon(location.category),
                                 color: isActive
-                                    ? Colors.blue
+                                    ? Theme.of(context).colorScheme.primary
                                     : isCompleted
-                                        ? Colors.green
-                                        : Colors.white.withValues(alpha:0.7),
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                                 size: 24,
                               ),
                               const SizedBox(height: 8),
@@ -452,10 +471,10 @@ class _VirtualRealityTourScreenState extends State<VirtualRealityTourScreen>
                                 location.name,
                                 style: TextStyle(
                                   color: isActive
-                                      ? Colors.blue
+                                      ? Theme.of(context).colorScheme.primary
                                       : isCompleted
-                                          ? Colors.green
-                                          : Colors.white.withValues(alpha:0.7),
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),

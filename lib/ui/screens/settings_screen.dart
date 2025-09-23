@@ -1,22 +1,23 @@
 // lib/ui/screens/settings_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/services/firestore_service.dart';
+import 'package:universe/providers/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Settings state
   bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
   String _selectedLanguage = 'English';
   bool _locationSharing = true;
   bool _dataUsageOptimization = false;
@@ -33,7 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (userProfile != null) {
         setState(() {
           _notificationsEnabled = userProfile['notificationsEnabled'] ?? true;
-          _darkModeEnabled = userProfile['darkModeEnabled'] ?? false;
           _selectedLanguage = userProfile['language'] ?? 'English';
           _locationSharing = userProfile['locationSharing'] ?? true;
           _dataUsageOptimization = userProfile['dataUsageOptimization'] ?? false;
@@ -48,7 +48,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await _firestoreService.updateUserProfile({
         'notificationsEnabled': _notificationsEnabled,
-        'darkModeEnabled': _darkModeEnabled,
         'language': _selectedLanguage,
         'locationSharing': _locationSharing,
         'dataUsageOptimization': _dataUsageOptimization,
@@ -69,6 +68,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Widget _buildThemeSwitchTile() {
+    final themeMode = ref.watch(themeProvider);
+    final themeNotifier = ref.read(themeProvider.notifier);
+    
+    String getThemeSubtitle() {
+      switch (themeMode) {
+        case ThemeMode.light:
+          return 'Light theme';
+        case ThemeMode.dark:
+          return 'Dark theme';
+        case ThemeMode.system:
+          return 'Follow system theme';
+      }
+    }
+
+    return ListTile(
+      leading: Icon(
+        themeMode == ThemeMode.dark ? Icons.dark_mode : 
+        themeMode == ThemeMode.light ? Icons.light_mode : Icons.brightness_auto,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      title: Text(
+        'Theme',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      subtitle: Text(
+        getThemeSubtitle(),
+        style: TextStyle(
+          fontSize: 14,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
+        ),
+      ),
+      trailing: Switch(
+        value: themeMode == ThemeMode.dark,
+        onChanged: (value) {
+          themeNotifier.toggleTheme();
+        },
+        activeColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -131,17 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   });
                 },
               ),
-              _buildSwitchTile(
-                icon: Icons.dark_mode,
-                title: 'Dark Mode',
-                subtitle: 'Switch between light and dark themes',
-                value: _darkModeEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _darkModeEnabled = value;
-                  });
-                },
-              ),
+              _buildThemeSwitchTile(),
               _buildListTile(
                 icon: Icons.language,
                 title: 'Language',
@@ -197,8 +232,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ElevatedButton(
                 onPressed: _saveSettings,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -250,10 +283,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -274,23 +307,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required VoidCallback? onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF957DAD)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
         ),
       ),
-      trailing: onTap != null ? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey) : null,
+      trailing: onTap != null ? Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.5)) : null,
       onTap: onTap,
     );
   }
@@ -303,26 +336,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF957DAD)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
         ),
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF957DAD),
+        activeColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }

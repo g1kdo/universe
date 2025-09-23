@@ -1,16 +1,17 @@
 // lib/ui/screens/privacy_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class PrivacyScreen extends StatefulWidget {
+class PrivacyScreen extends ConsumerStatefulWidget {
   const PrivacyScreen({super.key});
 
   @override
-  State<PrivacyScreen> createState() => _PrivacyScreenState();
+  ConsumerState<PrivacyScreen> createState() => _PrivacyScreenState();
 }
 
-class _PrivacyScreenState extends State<PrivacyScreen> {
+class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -89,7 +90,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -229,8 +230,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               child: ElevatedButton(
                 onPressed: _savePrivacySettings,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -278,7 +279,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -291,15 +292,15 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               Icon(
                 Icons.lock,
                 size: 80,
-                color: Colors.grey[400],
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Sign in to manage your privacy settings',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -308,7 +309,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                 'Control your data, privacy, and communication preferences when you sign in to your account.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -318,8 +319,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   Navigator.pushNamed(context, '/login');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
                 child: const Text('Sign In'),
@@ -336,7 +337,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.purple.shade400],
+          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -345,14 +346,14 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.security, color: Colors.white, size: 24),
-              SizedBox(width: 8),
+              Icon(Icons.security, color: Theme.of(context).colorScheme.onPrimary, size: 24),
+              const SizedBox(width: 8),
               Text(
                 'Your Privacy Matters',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -360,10 +361,10 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Take control of your data and privacy. Customize your settings to match your preferences.',
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 14,
             ),
           ),
@@ -385,12 +386,12 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
   Widget _buildPrivacyStat(String label, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 20),
+        Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 20),
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -404,10 +405,10 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -428,23 +429,23 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF957DAD)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
       onTap: onTap,
     );
   }
@@ -457,26 +458,26 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF957DAD)),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: Colors.black87,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
           fontSize: 14,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF957DAD),
+        activeColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -527,8 +528,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               _showDeleteConfirmationDialog();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             child: const Text('Delete Account'),
           ),
@@ -558,8 +559,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             child: const Text('Delete'),
           ),

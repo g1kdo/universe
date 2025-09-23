@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Home Header Component with dynamic user data
             _isLoadingProfile
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary))
                 : _buildHomeHeader(),
             const SizedBox(height: 20),
 
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               stream: _labsStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
                 }
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, eventsSnapshot) {
                     if (newsSnapshot.connectionState == ConnectionState.waiting || 
                         eventsSnapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
                     }
                     
                     final news = newsSnapshot.data ?? [];

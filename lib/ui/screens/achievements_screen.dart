@@ -1,5 +1,6 @@
 // lib/ui/screens/achievements_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -25,14 +26,14 @@ class Achievement {
   });
 }
 
-class AchievementsScreen extends StatefulWidget {
+class AchievementsScreen extends ConsumerStatefulWidget {
   const AchievementsScreen({super.key});
 
   @override
-  State<AchievementsScreen> createState() => _AchievementsScreenState();
+  ConsumerState<AchievementsScreen> createState() => _AchievementsScreenState();
 }
 
-class _AchievementsScreenState extends State<AchievementsScreen> {
+class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -192,8 +193,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     }
 
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
       );
     }
 
@@ -203,7 +204,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -231,7 +232,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -244,15 +245,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               Icon(
                 Icons.emoji_events,
                 size: 80,
-                color: Colors.grey[400],
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Sign in to view your achievements',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -261,7 +262,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 'Track your campus activities and unlock achievements as you participate in events and explore the campus.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -271,8 +272,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   Navigator.pushNamed(context, '/login');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
                 child: const Text('Sign In'),
@@ -289,7 +290,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.purple.shade400, Colors.blue.shade400],
+          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -308,15 +309,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           const SizedBox(height: 16),
           LinearProgressIndicator(
             value: _achievements.isNotEmpty ? _unlockedCount / _achievements.length : 0,
-            backgroundColor: Colors.white.withValues(alpha: 0.3),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            backgroundColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
             minHeight: 8,
           ),
           const SizedBox(height: 8),
           Text(
             '${((_unlockedCount / _achievements.length) * 100).toInt()}% Complete',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -328,20 +329,20 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   Widget _buildStatItem(String value, String label, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: Theme.of(context).colorScheme.onPrimary, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary,
             fontSize: 12,
           ),
         ),
@@ -360,10 +361,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         children: [
           Text(
             category,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -384,7 +385,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
           borderRadius: BorderRadius.circular(12),
           gradient: achievement.isUnlocked
               ? LinearGradient(
-                  colors: [Colors.amber.shade100, Colors.orange.shade100],
+                  colors: [Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -395,7 +396,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: achievement.isUnlocked ? Colors.amber.shade200 : Colors.grey.shade200,
+              color: achievement.isUnlocked ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(25),
             ),
             child: Center(
@@ -409,7 +410,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             achievement.title,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: achievement.isUnlocked ? Colors.black87 : Colors.grey[600],
+              color: achievement.isUnlocked ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           subtitle: Column(
@@ -418,7 +419,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               Text(
                 achievement.description,
                 style: TextStyle(
-                  color: achievement.isUnlocked ? Colors.black54 : Colors.grey[500],
+                  color: achievement.isUnlocked ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7) : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(height: 4),
@@ -427,7 +428,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   Icon(
                     Icons.stars,
                     size: 16,
-                    color: achievement.isUnlocked ? Colors.amber[700] : Colors.grey[400],
+                    color: achievement.isUnlocked ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -435,7 +436,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: achievement.isUnlocked ? Colors.amber[700] : Colors.grey[400],
+                      color: achievement.isUnlocked ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                   if (achievement.isUnlocked && achievement.unlockedAt != null) ...[
@@ -444,7 +445,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                       'Unlocked ${_formatDate(achievement.unlockedAt!)}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.green[600],
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -454,8 +455,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ],
           ),
           trailing: achievement.isUnlocked
-              ? Icon(Icons.check_circle, color: Colors.green[600])
-              : Icon(Icons.lock, color: Colors.grey[400]),
+              ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+              : Icon(Icons.lock, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
         ),
       ),
     );

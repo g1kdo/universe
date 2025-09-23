@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:universe/models/event_model.dart';
 import 'package:universe/services/firestore_service.dart';
+import 'package:universe/ui/components/modals/event_details_modal.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
@@ -167,12 +168,22 @@ class _EventCardState extends State<EventCard> {
     final categoryColor = _getCategoryColor(widget.event.category);
     final formattedDate = DateFormat('MMM dd, yyyy').format(widget.event.date);
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 15),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => EventDetailsModal(
+            event: widget.event,
+            onRegistrationChanged: widget.onRegistrationChanged,
+          ),
+        );
+      },
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.only(bottom: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -183,7 +194,7 @@ class _EventCardState extends State<EventCard> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: categoryColor.withOpacity(0.1),
+                    color: categoryColor.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -200,22 +211,23 @@ class _EventCardState extends State<EventCard> {
                 children: [
                   Text(
                         widget.event.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      Icon(Icons.location_on, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                       const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               widget.event.location,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                               ),
                         ),
                       ),
@@ -224,23 +236,23 @@ class _EventCardState extends State<EventCard> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                      Icon(Icons.calendar_today, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                       const SizedBox(width: 4),
                       Text(
                             formattedDate,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[700],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                          Icon(Icons.access_time, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                           const SizedBox(width: 4),
                           Text(
                             widget.event.time,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey[700],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                         ),
                       ),
                     ],
@@ -251,7 +263,7 @@ class _EventCardState extends State<EventCard> {
                           widget.event.description,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -271,7 +283,7 @@ class _EventCardState extends State<EventCard> {
                   '${widget.event.registeredUsers.length}/${widget.event.maxParticipants} registered',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                   ),
                 ),
                 ElevatedButton(
@@ -285,22 +297,23 @@ class _EventCardState extends State<EventCard> {
                     ),
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                           ),
                         )
                       : Text(
                           _isRegistered ? 'Unregister' : 'Register',
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary),
                         ),
                 ),
               ],
             ),
           ],
+        ),
         ),
       ),
     );

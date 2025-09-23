@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universe/models/lab_model.dart';
 import 'package:universe/services/firestore_service.dart';
 
-class MapsScreen extends StatefulWidget {
+class MapsScreen extends ConsumerStatefulWidget {
   const MapsScreen({super.key});
 
   @override
-  State<MapsScreen> createState() => _MapsScreenState();
+  ConsumerState<MapsScreen> createState() => _MapsScreenState();
 }
 
-class _MapsScreenState extends State<MapsScreen> {
+class _MapsScreenState extends ConsumerState<MapsScreen> {
   GoogleMapController? _mapController;
   final FirestoreService _firestoreService = FirestoreService();
   
@@ -414,12 +415,14 @@ class _MapsScreenState extends State<MapsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Stack(
         children: [
           // Google Map
           if (_isLoading)
-            const Center(child: CircularProgressIndicator())
+            Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary))
           else
             GoogleMap(
               onMapCreated: (GoogleMapController controller) {
@@ -435,6 +438,7 @@ class _MapsScreenState extends State<MapsScreen> {
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               mapToolbarEnabled: false,
+              mapType: isDark ? MapType.normal : MapType.normal, // You can use MapType.satellite for dark mode if preferred
             ),
           
           // Search Bar
@@ -445,11 +449,11 @@ class _MapsScreenState extends State<MapsScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.shadow.withValues(alpha:0.3),
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: const Offset(0, 3),
@@ -458,12 +462,14 @@ class _MapsScreenState extends State<MapsScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search, color: Colors.grey),
+                  Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      decoration: InputDecoration(
                         hintText: 'Search campus locations...',
+                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                         border: InputBorder.none,
                       ),
                       onChanged: (value) {
@@ -493,11 +499,11 @@ class _MapsScreenState extends State<MapsScreen> {
             child: Container(
               height: 200,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: const Offset(0, 3),
@@ -508,11 +514,12 @@ class _MapsScreenState extends State<MapsScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
-                    child: const Text(
+                    child: Text(
                       'Campus Locations',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -526,7 +533,10 @@ class _MapsScreenState extends State<MapsScreen> {
                             _getLocationIcon(location.key),
                             color: _getLocationColor(location.key),
                           ),
-                          title: Text(location.key),
+                          title: Text(
+                            location.key,
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                          ),
                           onTap: () {
                             _mapController?.animateCamera(
                               CameraUpdate.newLatLng(location.value),
@@ -553,8 +563,8 @@ class _MapsScreenState extends State<MapsScreen> {
                     _polylines.clear();
                   });
                 },
-                backgroundColor: Colors.white,
-                child: const Icon(Icons.clear, color: Colors.red),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                child: Icon(Icons.clear, color: Theme.of(context).colorScheme.error),
               ),
             ),
         ],
