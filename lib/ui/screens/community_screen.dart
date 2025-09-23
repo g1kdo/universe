@@ -55,47 +55,6 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
 
   bool _isLoading(String key) => _loadingStates[key] ?? false;
 
-  Future<void> _createLostFoundItem(LostFoundItem item) async {
-    try {
-      _setLoading('create_lost_found', true);
-      await _firestoreService.createLostFoundItem(item);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item reported successfully!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-      }
-    } finally {
-      _setLoading('create_lost_found', false);
-    }
-  }
-
-  Future<void> _updateLostFoundItem(String itemId, LostFoundItem item) async {
-    try {
-      _setLoading('update_lost_found_$itemId', true);
-      await _firestoreService.updateLostFoundItem(itemId, item);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item updated successfully!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-      }
-    } finally {
-      _setLoading('update_lost_found_$itemId', false);
-    }
-  }
 
   Future<void> _resolveLostFoundItem(String itemId) async {
     final notes = await _showResolveDialog();
@@ -186,47 +145,6 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     }
   }
 
-  Future<void> _createClub(Club club) async {
-    try {
-      _setLoading('create_club', true);
-      await _firestoreService.createClub(club);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Club created successfully!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-      }
-    } finally {
-      _setLoading('create_club', false);
-    }
-  }
-
-  Future<void> _updateClub(String clubId, Club club) async {
-    try {
-      _setLoading('update_club_$clubId', true);
-      await _firestoreService.updateClub(clubId, club);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Club updated successfully!')),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
-      }
-    } finally {
-      _setLoading('update_club_$clubId', false);
-    }
-  }
 
   Future<void> _deleteClub(String clubId) async {
     final confirmed = await _showDeleteClubConfirmation();
@@ -451,7 +369,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                   ElevatedButton.icon(
                     onPressed: () => _showLostFoundForm(),
                     icon: const Icon(Icons.add),
-                    label: const Text('Report Item'),
+                    label: const Text('Report Lost Item'),
                   ),
               ],
             ),
@@ -636,50 +554,65 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
 
   // Navigation methods
   void _showLostFoundForm({LostFoundItem? item}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        maxChildSize: 0.95,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(16.0),
-          child: LostFoundForm(
-            item: item,
-            onSubmit: (newItem) {
-              if (item == null) {
-                _createLostFoundItem(newItem);
-              } else {
-                _updateLostFoundItem(item.id, newItem);
-              }
-            },
-          ),
+    final user = _auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to report items')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LostFoundForm(
+          key: const ValueKey('lost_found_form'),
+          item: item,
+          userId: user.uid,
+          userName: user.displayName ?? 'Unknown User',
+          userEmail: user.email,
+          userPhone: user.phoneNumber,
+          onSuccess: () {
+            // Refresh the data or show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(item == null ? 'Lost item reported successfully!' : 'Lost item updated successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
   void _showClubForm({Club? club}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        maxChildSize: 0.95,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(16.0),
-          child: ClubForm(
-            club: club,
-            onSubmit: (newClub) {
-              if (club == null) {
-                _createClub(newClub);
-              } else {
-                _updateClub(club.id, newClub);
-              }
-            },
-          ),
+    final user = _auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to create clubs')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClubForm(
+          key: const ValueKey('club_form'),
+          club: club,
+          userId: user.uid,
+          userName: user.displayName ?? 'Unknown User',
+          userEmail: user.email,
+          onSuccess: () {
+            // Refresh the data or show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(club == null ? 'Club created successfully!' : 'Club updated successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -695,6 +628,21 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Image if available
+              if (item.imageUrl != null) ...[
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    image: DecorationImage(
+                      image: NetworkImage(item.imageUrl!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               Text('Type: ${item.type.toUpperCase()}'),
               const SizedBox(height: 8),
               Text('Category: ${item.category.toUpperCase()}'),
@@ -737,6 +685,23 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Logo if available
+              if (club.logoUrl != null) ...[
+                Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: NetworkImage(club.logoUrl!),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               Text('Category: ${club.category.toUpperCase()}'),
               const SizedBox(height: 8),
               Text('Description: ${club.description}'),

@@ -254,7 +254,7 @@ class FirestoreService {
     });
   }
 
-  Future<String> createLostFoundItem(LostFoundItem item) async {
+  Future<String> addLostFoundItem(LostFoundItem item) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to report an item');
 
@@ -262,12 +262,12 @@ class FirestoreService {
     return docRef.id;
   }
 
-  Future<void> updateLostFoundItem(String itemId, LostFoundItem item) async {
+  Future<void> updateLostFoundItem(LostFoundItem item) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to update an item');
 
     // Check if user is the reporter or an admin
-    final itemDoc = await _firestore.collection('lostFoundItems').doc(itemId).get();
+    final itemDoc = await _firestore.collection('lostFoundItems').doc(item.id).get();
     if (!itemDoc.exists) throw Exception('Item not found');
     
     final itemData = itemDoc.data()!;
@@ -276,7 +276,7 @@ class FirestoreService {
       throw Exception('You can only update items you reported');
     }
 
-    await _firestore.collection('lostFoundItems').doc(itemId).update(item.toMap());
+    await _firestore.collection('lostFoundItems').doc(item.id).update(item.toMap());
   }
 
   Future<void> resolveLostFoundItem(String itemId, String notes) async {
@@ -337,7 +337,7 @@ class FirestoreService {
     });
   }
 
-  Future<String> createClub(Club club) async {
+  Future<String> addClub(Club club) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to create a club');
 
@@ -345,12 +345,12 @@ class FirestoreService {
     return docRef.id;
   }
 
-  Future<void> updateClub(String clubId, Club club) async {
+  Future<void> updateClub(Club club) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to update a club');
 
     // Check if user is admin of the club
-    final clubDoc = await _firestore.collection('clubs').doc(clubId).get();
+    final clubDoc = await _firestore.collection('clubs').doc(club.id).get();
     if (!clubDoc.exists) throw Exception('Club not found');
     
     final clubData = clubDoc.data()!;
@@ -359,7 +359,7 @@ class FirestoreService {
       throw Exception('You can only update clubs you admin');
     }
 
-    await _firestore.collection('clubs').doc(clubId).update(club.toMap());
+    await _firestore.collection('clubs').doc(club.id).update(club.toMap());
   }
 
   Future<void> joinClub(String clubId) async {

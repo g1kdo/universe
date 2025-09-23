@@ -13,8 +13,8 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     
     // Suppress Java version warnings
@@ -23,7 +23,20 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "17"
+    }
+    
+    // Fix Kotlin compilation issues
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+            freeCompilerArgs += listOf("-Xjvm-default=all")
+        }
+    }
+    
+    // Disable incremental compilation for this project
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        incremental = false
     }
 
     defaultConfig {

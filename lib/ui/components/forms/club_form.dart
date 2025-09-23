@@ -1,17 +1,26 @@
-// lib/ui/components/forms/club_form.dart
+// lib/ui/components/club_form.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:universe/models/club_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../../models/club_model.dart';
+import '../../../services/firestore_service.dart';
+import '../../../services/storage_service.dart';
+import '../image_picker_widget.dart';
 
 class ClubForm extends StatefulWidget {
-  final Club? club; // null for create, club for edit
-  final Function(Club) onSubmit;
+  final Club? club;
+  final String userId;
+  final String userName;
+  final String? userEmail;
+  final VoidCallback? onSuccess;
 
   const ClubForm({
-    super.key,
+    Key? key,
     this.club,
-    required this.onSubmit,
-  });
+    required this.userId,
+    required this.userName,
+    this.userEmail,
+    this.onSuccess,
+  }) : super(key: key);
 
   @override
   State<ClubForm> createState() => _ClubFormState();
@@ -26,11 +35,13 @@ class _ClubFormState extends State<ClubForm> {
   final _websiteController = TextEditingController();
   final _socialMediaController = TextEditingController();
   final _contactInfoController = TextEditingController();
+  final _maxMembersController = TextEditingController();
   final _tagsController = TextEditingController();
-  
-  String _selectedCategory = 'other';
-  int _maxMembers = 50;
-  String? _logoUrl;
+  final _firestoreService = FirestoreService();
+
+  String _category = 'other';
+  File? _selectedImage;
+  bool _isLoading = false;
 
   final List<String> _categories = [
     'academic',
@@ -38,7 +49,7 @@ class _ClubFormState extends State<ClubForm> {
     'cultural',
     'social',
     'professional',
-    'other'
+    'other',
   ];
 
   @override
@@ -52,10 +63,11 @@ class _ClubFormState extends State<ClubForm> {
       _websiteController.text = widget.club!.website ?? '';
       _socialMediaController.text = widget.club!.socialMedia ?? '';
       _contactInfoController.text = widget.club!.contactInfo ?? '';
+      _maxMembersController.text = widget.club!.maxMembers.toString();
       _tagsController.text = widget.club!.tags.join(', ');
-      _selectedCategory = widget.club!.category;
-      _maxMembers = widget.club!.maxMembers;
-      _logoUrl = widget.club!.logoUrl;
+      _category = widget.club!.category;
+    } else {
+      _maxMembersController.text = '50'; // Default value
     }
   }
 
@@ -68,38 +80,58 @@ class _ClubFormState extends State<ClubForm> {
     _websiteController.dispose();
     _socialMediaController.dispose();
     _contactInfoController.dispose();
+    _maxMembersController.dispose();
     _tagsController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please log in to submit')),
-        );
-        return;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String? logoUrl;
+
+      // Upload logo if selected
+      if (_selectedImage != null) {
+        logoUrl = await StorageService.uploadClubLogo(_selectedImage!);
+        if (logoUrl == null) {
+          _showErrorSnackBar('Failed to upload logo. Please try again.');
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+      } else if (widget.club?.logoUrl != null) {
+        // Keep existing logo URL if no new image selected
+        logoUrl = widget.club!.logoUrl;
       }
 
+      // Parse tags
       final tags = _tagsController.text
           .split(',')
           .map((tag) => tag.trim())
           .where((tag) => tag.isNotEmpty)
           .toList();
 
+      // Parse max members
+      final maxMembers = int.tryParse(_maxMembersController.text) ?? 50;
+
       final club = Club(
         id: widget.club?.id ?? '',
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
-        category: _selectedCategory,
-        logoUrl: _logoUrl,
-        presidentId: widget.club?.presidentId ?? currentUser.uid,
-        presidentName: widget.club?.presidentName ?? (currentUser.displayName ?? 'Anonymous'),
-        presidentEmail: widget.club?.presidentEmail ?? currentUser.email,
-        memberIds: widget.club?.memberIds ?? [currentUser.uid],
-        adminIds: widget.club?.adminIds ?? [currentUser.uid],
-        maxMembers: _maxMembers,
+        category: _category,
+        logoUrl: logoUrl,
+        presidentId: widget.userId,
+        presidentName: widget.userName,
+        presidentEmail: widget.userEmail,
+        memberIds: widget.club?.memberIds ?? [widget.userId],
+        adminIds: widget.club?.adminIds ?? [widget.userId],
+        maxMembers: maxMembers,
         meetingSchedule: _meetingScheduleController.text.trim(),
         meetingLocation: _meetingLocationController.text.trim(),
         tags: tags,
@@ -111,211 +143,254 @@ class _ClubFormState extends State<ClubForm> {
         contactInfo: _contactInfoController.text.trim().isEmpty ? null : _contactInfoController.text.trim(),
       );
 
-      widget.onSubmit(club);
+      if (widget.club != null) {
+        // Update existing club
+        await _firestoreService.updateClub(club);
+        _showSuccessSnackBar('Club updated successfully!');
+      } else {
+        // Create new club
+        await _firestoreService.addClub(club);
+        _showSuccessSnackBar('Club created successfully!');
+      }
+
+      if (widget.onSuccess != null) {
+        widget.onSuccess!();
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      _showErrorSnackBar('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Club Name
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Club Name *',
-                hintText: 'Enter club name',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a club name';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Description
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description *',
-                hintText: 'Describe your club',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Category
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Category *',
-                border: OutlineInputBorder(),
-              ),
-              items: _categories.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Max Members
-            TextFormField(
-              initialValue: _maxMembers.toString(),
-              decoration: const InputDecoration(
-                labelText: 'Maximum Members *',
-                hintText: '50',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter maximum members';
-                }
-                final number = int.tryParse(value);
-                if (number == null || number < 1) {
-                  return 'Please enter a valid number';
-                }
-                return null;
-              },
-              onChanged: (value) {
-                final number = int.tryParse(value);
-                if (number != null && number > 0) {
-                  _maxMembers = number;
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Meeting Schedule
-            TextFormField(
-              controller: _meetingScheduleController,
-              decoration: const InputDecoration(
-                labelText: 'Meeting Schedule *',
-                hintText: 'e.g., Every Tuesday 6:00 PM',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter meeting schedule';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Meeting Location
-            TextFormField(
-              controller: _meetingLocationController,
-              decoration: const InputDecoration(
-                labelText: 'Meeting Location *',
-                hintText: 'e.g., Room 201, Main Building',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter meeting location';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Tags
-            TextFormField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags (optional)',
-                hintText: 'coding, programming, tech (comma separated)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Logo URL (optional)
-            TextFormField(
-              initialValue: _logoUrl,
-              decoration: const InputDecoration(
-                labelText: 'Logo URL (optional)',
-                hintText: 'https://example.com/logo.png',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                _logoUrl = value.trim().isEmpty ? null : value.trim();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Website (optional)
-            TextFormField(
-              controller: _websiteController,
-              decoration: const InputDecoration(
-                labelText: 'Website (optional)',
-                hintText: 'https://example.com',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Social Media (optional)
-            TextFormField(
-              controller: _socialMediaController,
-              decoration: const InputDecoration(
-                labelText: 'Social Media (optional)',
-                hintText: 'Instagram: @clubname',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Contact Info (optional)
-            TextFormField(
-              controller: _contactInfoController,
-              decoration: const InputDecoration(
-                labelText: 'Contact Info (optional)',
-                hintText: 'Additional contact information',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 24),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  widget.club == null ? 'Create Club' : 'Update Club',
-                  style: const TextStyle(fontSize: 16),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.club != null ? 'Edit Club' : 'Create Club'),
+        actions: [
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
             ),
-          ],
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Logo Picker
+              ImagePickerWidget(
+                initialImageUrl: widget.club?.logoUrl,
+                label: 'Club Logo',
+                hint: 'Upload a logo for your club',
+                onImageChanged: (url) {
+                  // This will be called when image is selected
+                },
+                width: 150,
+                height: 150,
+              ),
+              const SizedBox(height: 24),
+
+              // Club Name
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Club Name *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a club name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Description
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description *',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Category
+              DropdownButtonFormField<String>(
+                value: _category,
+                decoration: const InputDecoration(
+                  labelText: 'Category *',
+                  border: OutlineInputBorder(),
+                ),
+                items: _categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category.toUpperCase()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _category = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Meeting Schedule
+              TextFormField(
+                controller: _meetingScheduleController,
+                decoration: const InputDecoration(
+                  labelText: 'Meeting Schedule *',
+                  border: OutlineInputBorder(),
+                  hintText: 'e.g., Every Tuesday 6:00 PM',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter meeting schedule';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Meeting Location
+              TextFormField(
+                controller: _meetingLocationController,
+                decoration: const InputDecoration(
+                  labelText: 'Meeting Location *',
+                  border: OutlineInputBorder(),
+                  hintText: 'Where do you meet?',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter meeting location';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Max Members
+              TextFormField(
+                controller: _maxMembersController,
+                decoration: const InputDecoration(
+                  labelText: 'Maximum Members *',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter maximum members';
+                  }
+                  final number = int.tryParse(value);
+                  if (number == null || number < 1) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Tags
+              TextFormField(
+                controller: _tagsController,
+                decoration: const InputDecoration(
+                  labelText: 'Tags',
+                  border: OutlineInputBorder(),
+                  hintText: 'Separate tags with commas (e.g., programming, tech, coding)',
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Website
+              TextFormField(
+                controller: _websiteController,
+                decoration: const InputDecoration(
+                  labelText: 'Website',
+                  border: OutlineInputBorder(),
+                  hintText: 'https://example.com',
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 16),
+
+              // Social Media
+              TextFormField(
+                controller: _socialMediaController,
+                decoration: const InputDecoration(
+                  labelText: 'Social Media',
+                  border: OutlineInputBorder(),
+                  hintText: 'Instagram, Facebook, Twitter handles',
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Contact Info
+              TextFormField(
+                controller: _contactInfoController,
+                decoration: const InputDecoration(
+                  labelText: 'Additional Contact Info',
+                  border: OutlineInputBorder(),
+                  hintText: 'Any additional contact information',
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 32),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(widget.club != null ? 'Update Club' : 'Create Club'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

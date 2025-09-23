@@ -1,17 +1,28 @@
-// lib/ui/components/forms/lost_found_form.dart
+// lib/ui/components/lost_found_form.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:universe/models/lost_found_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../../models/lost_found_model.dart';
+import '../../../services/firestore_service.dart';
+import '../../../services/storage_service.dart';
+import '../image_picker_widget.dart';
 
 class LostFoundForm extends StatefulWidget {
-  final LostFoundItem? item; // null for create, item for edit
-  final Function(LostFoundItem) onSubmit;
+  final LostFoundItem? item;
+  final String userId;
+  final String userName;
+  final String? userEmail;
+  final String? userPhone;
+  final VoidCallback? onSuccess;
 
   const LostFoundForm({
-    super.key,
+    Key? key,
     this.item,
-    required this.onSubmit,
-  });
+    required this.userId,
+    required this.userName,
+    this.userEmail,
+    this.userPhone,
+    this.onSuccess,
+  }) : super(key: key);
 
   @override
   State<LostFoundForm> createState() => _LostFoundFormState();
@@ -23,18 +34,19 @@ class _LostFoundFormState extends State<LostFoundForm> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   final _notesController = TextEditingController();
-  
-  String _selectedType = 'lost';
-  String _selectedCategory = 'other';
-  String? _imageUrl;
+  final _firestoreService = FirestoreService();
 
-  final List<String> _types = ['lost', 'found'];
+  String _type = 'lost'; // Always default to 'lost' for new items
+  String _category = 'other';
+  File? _selectedImage;
+  bool _isLoading = false;
+
   final List<String> _categories = [
     'electronics',
-    'clothing', 
+    'clothing',
     'books',
     'accessories',
-    'other'
+    'other',
   ];
 
   @override
@@ -45,9 +57,8 @@ class _LostFoundFormState extends State<LostFoundForm> {
       _descriptionController.text = widget.item!.description;
       _locationController.text = widget.item!.location;
       _notesController.text = widget.item!.notes ?? '';
-      _selectedType = widget.item!.type;
-      _selectedCategory = widget.item!.category;
-      _imageUrl = widget.item!.imageUrl;
+      _type = widget.item!.type;
+      _category = widget.item!.category;
     }
   }
 
@@ -60,28 +71,43 @@ class _LostFoundFormState extends State<LostFoundForm> {
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please log in to submit')),
-        );
-        return;
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String? imageUrl;
+
+      // Upload image if selected
+      if (_selectedImage != null) {
+        imageUrl = await StorageService.uploadLostFoundImage(_selectedImage!);
+        if (imageUrl == null) {
+          _showErrorSnackBar('Failed to upload image. Please try again.');
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+      } else if (widget.item?.imageUrl != null) {
+        // Keep existing image URL if no new image selected
+        imageUrl = widget.item!.imageUrl;
       }
 
       final item = LostFoundItem(
         id: widget.item?.id ?? '',
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        type: _selectedType,
-        category: _selectedCategory,
+        type: _type,
+        category: _category,
         location: _locationController.text.trim(),
-        imageUrl: _imageUrl,
-        reporterId: currentUser.uid,
-        reporterName: currentUser.displayName ?? 'Anonymous',
-        reporterEmail: currentUser.email,
-        reporterPhone: null, // You can add phone field if needed
+        imageUrl: imageUrl,
+        reporterId: widget.userId,
+        reporterName: widget.userName,
+        reporterEmail: widget.userEmail,
+        reporterPhone: widget.userPhone,
         reportedAt: widget.item?.reportedAt ?? DateTime.now(),
         isResolved: widget.item?.isResolved ?? false,
         resolvedBy: widget.item?.resolvedBy,
@@ -89,159 +115,182 @@ class _LostFoundFormState extends State<LostFoundForm> {
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       );
 
-      widget.onSubmit(item);
+      if (widget.item != null) {
+        // Update existing item
+        await _firestoreService.updateLostFoundItem(item);
+        _showSuccessSnackBar('Lost item updated successfully!');
+      } else {
+        // Create new item
+        await _firestoreService.addLostFoundItem(item);
+        _showSuccessSnackBar('Lost item reported successfully!');
+      }
+
+      if (widget.onSuccess != null) {
+        widget.onSuccess!();
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      _showErrorSnackBar('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Type Selection
-            Text(
-              'Type',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: _types.map((type) {
-                return Expanded(
-                  child: RadioListTile<String>(
-                    title: Text(type.toUpperCase()),
-                    value: type,
-                    groupValue: _selectedType,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedType = value!;
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-
-            // Title
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title *',
-                hintText: 'Brief description of the item',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a title';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Description
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description *',
-                hintText: 'Detailed description of the item',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Category
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Category *',
-                border: OutlineInputBorder(),
-              ),
-              items: _categories.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Location
-            TextFormField(
-              controller: _locationController,
-              decoration: const InputDecoration(
-                labelText: 'Location *',
-                hintText: 'Where was it lost/found?',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter the location';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Image URL (optional)
-            TextFormField(
-              initialValue: _imageUrl,
-              decoration: const InputDecoration(
-                labelText: 'Image URL (optional)',
-                hintText: 'https://example.com/image.jpg',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                _imageUrl = value.trim().isEmpty ? null : value.trim();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Notes (optional)
-            TextFormField(
-              controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Additional Notes (optional)',
-                hintText: 'Any additional information',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 24),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  widget.item == null ? 'Report Item' : 'Update Item',
-                  style: const TextStyle(fontSize: 16),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.item != null ? 'Edit Lost Item' : 'Report Lost Item'),
+        actions: [
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
             ),
-          ],
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Picker
+              ImagePickerWidget(
+                initialImageUrl: widget.item?.imageUrl,
+                label: 'Item Photo',
+                hint: 'Take a photo or select from gallery',
+                onImageChanged: (url) {
+                  // This will be called when image is selected
+                },
+                width: 200,
+                height: 150,
+              ),
+              const SizedBox(height: 24),
+
+              // Title
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Description
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description *',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Category
+              DropdownButtonFormField<String>(
+                value: _category,
+                decoration: const InputDecoration(
+                  labelText: 'Category *',
+                  border: OutlineInputBorder(),
+                ),
+                items: _categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category.toUpperCase()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _category = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Location
+              TextFormField(
+                controller: _locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Location *',
+                  border: OutlineInputBorder(),
+                  hintText: 'Where was it lost/found?',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter the location';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Notes
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Additional Notes',
+                  border: OutlineInputBorder(),
+                  hintText: 'Any additional information...',
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 32),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(widget.item != null ? 'Update Lost Item' : 'Report Lost Item'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
