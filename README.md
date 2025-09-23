@@ -103,20 +103,20 @@ flutter build apk --release
 
 1. **Create a GitHub Release**:
    ```bash
-   # Tag the current version
-   git tag -a v2.0 -m "Universe v2.0 with Image Upload"
-   git push origin v2.0
+   # Tag the current version (✅ DONE)
+   git tag -a v1.0 -m "Universe v1.0 with Image Upload"
+   git push origin v1.0
    ```
 
 2. **Upload APK to Release**:
    - Go to [GitHub Releases](https://github.com/g1kdo/universe/releases)
    - Click "Create a new release"
-   - Select the `v2.0` tag
+   - Select the `v1.0` tag
    - Upload `build/app/outputs/flutter-apk/app-release.apk`
    - Publish the release
 
 3. **Result**:
-   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v2.0/app-release.apk`
+   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v1.0/app-release.apk`
    - QR code will work for public downloads
    - Users can download without building
 
@@ -861,7 +861,7 @@ SOFTWARE.
 
 ---
 
-## 🆕 **Latest Updates (v2.0)**
+## 🆕 **Latest Updates (v1.0)**
 
 ### ✨ **What's New**
 - **📸 Image Upload System**: Complete image upload functionality for Lost & Found and Club Management
