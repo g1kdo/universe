@@ -203,23 +203,27 @@ lib/
 │   ├── news_model.dart       # News article data structure
 │   ├── user_schedule_model.dart # User event schedule
 │   ├── lost_found_model.dart # Lost & found items
-│   └── club_model.dart       # Club management
+│   ├── club_model.dart       # Club management
+│   └── notification_model.dart # Notification system
 ├── services/                  # Business logic and API services
 │   ├── auth_service.dart     # Authentication management
-│   └── firestore_service.dart # Database operations
+│   ├── firestore_service.dart # Database operations
+│   └── notification_service.dart # Notification management
 ├── providers/                 # State management providers
 │   └── theme.dart            # Theme management with SharedPreferences
 ├── ui/                       # User interface layer
 │   ├── components/           # Reusable UI components
-│   │   ├── cards/           # Card components (events, labs, etc.)
-│   │   ├── forms/           # Form components
+│   │   ├── cards/           # Card components (events, labs, notifications, etc.)
+│   │   ├── forms/           # Form components (lost & found, club forms)
 │   │   ├── sections/        # Section components
-│   │   └── bars/            # Navigation and search bars
+│   │   ├── bars/            # Navigation and search bars
+│   │   └── modals/          # Modal dialogs and popups
 │   └── screens/             # Main application screens
 │       ├── home_screen.dart # Main dashboard
 │       ├── maps_screen.dart # Google Maps integration
 │       ├── schedule_screen.dart # Event calendar
 │       ├── community_screen.dart # Community features
+│       ├── notifications_screen.dart # Notification management
 │       ├── profile_screen.dart # User profile
 │       └── virtual_reality_tour_screen.dart # VR tour
 └── main.dart                # Application entry point
@@ -235,9 +239,10 @@ lib/
 
 ### 🗄️ **Database Architecture**
 - **Firestore**: NoSQL database for real-time data synchronization
-- **Collections**: Events, labs, news, users, schedules, lost_found, clubs
+- **Collections**: Events, labs, news, users, schedules, lost_found, clubs, notifications
 - **Security Rules**: Role-based access control and data validation
 - **Real-time Listeners**: Live updates across all connected clients
+- **Notification System**: Real-time notification delivery and management
 
 ---
 
@@ -271,6 +276,9 @@ google_sign_in: ^6.2.1
 image_picker: ^1.1.2
 cached_network_image: ^3.4.1
 path: ^1.9.0
+
+# Notification system dependencies
+flutter_local_notifications: ^17.2.3
 
 # Google Maps & Location
 google_maps_flutter: ^2.5.0
@@ -494,6 +502,10 @@ For easy sharing, you can:
 ## 📸 Application Screenshots
 
 ### 🏠 **Home Dashboard**
+![Home Dashboard](https://via.placeholder.com/300x600/2196F3/FFFFFF?text=Home+Dashboard)
+*Dynamic user profile with personalized welcome, global search functionality, and category filters for quick access to campus facilities.*
+
+**Key Features:**
 - **Dynamic User Profile**: Personalized welcome with user statistics
 - **Global Search**: Real-time search across all campus content
 - **Category Filters**: Quick access to labs, canteens, offices, gyms, libraries, hostels
@@ -501,6 +513,10 @@ For easy sharing, you can:
 - **Smart Recommendations**: Personalized content based on user activity
 
 ### 🗺️ **Maps & Navigation**
+![Maps Screen](https://via.placeholder.com/300x600/4CAF50/FFFFFF?text=Maps+Navigation)
+*Interactive Google Maps integration with real-time GPS tracking, campus markers, and multi-modal directions.*
+
+**Key Features:**
 - **Interactive Google Maps**: Full-featured campus mapping
 - **Real-time Location**: GPS tracking with permission handling
 - **Multi-modal Directions**: Walking, driving, and transit routes
@@ -508,6 +524,10 @@ For easy sharing, you can:
 - **Search Integration**: Find any location on campus instantly
 
 ### 📅 **Schedule Management**
+![Schedule Screen](https://via.placeholder.com/300x600/FF9800/FFFFFF?text=Schedule+Management)
+*Personal calendar with event registration, date-based filtering, and comprehensive event details.*
+
+**Key Features:**
 - **Personal Calendar**: All registered events in one place
 - **Date-based Filtering**: View events by specific dates
 - **Event Details**: Comprehensive event information
@@ -515,14 +535,46 @@ For easy sharing, you can:
 - **Reminder System**: Never miss important events
 
 ### 🤝 **Community Hub**
-- **Lost & Found**: Report and claim lost items with photo upload support
+![Community Screen](https://via.placeholder.com/300x600/9C27B0/FFFFFF?text=Community+Hub)
+*Lost & Found system with image upload, club management, and smart notification system.*
+
+**Key Features:**
+- **Lost & Found**: Report and claim lost items with photo upload support and smart workflow
 - **Club Management**: Join clubs, manage memberships, organize meetings with logo upload
+- **Smart Notification System**: Real-time notifications for community updates and lost item resolution
 - **Image Upload System**: Seamless photo capture and upload to Firebase Storage
+- **Multi-User Resolution**: Enhanced workflow where finders can mark items as found and reporters confirm resolution
 - **Community Stats**: Track your participation and engagement
 - **Anonymous Reporting**: Safe reporting system for campus issues
-- **Real-time Updates**: Live community activity feed
+- **Real-time Updates**: Live community activity feed with notification badges
+
+### 🔔 **Notifications Screen**
+![Notifications Screen](https://via.placeholder.com/300x600/FF5722/FFFFFF?text=Notifications)
+*Smart notification system with real-time updates, unread count badges, and contextual actions.*
+
+**Key Features:**
+- **Real-time Notifications**: Instant updates for lost items, club updates, and community events
+- **Unread Count Badge**: Visual indicator of unread notifications
+- **Notification Management**: Mark as read, delete, and organize notifications
+- **Contextual Actions**: Tap notifications to navigate to related content
+- **Persistent Storage**: Notifications stored securely in Firestore
+
+### 📱 **Lost & Found Workflow**
+![Lost & Found Workflow](https://via.placeholder.com/300x600/607D8B/FFFFFF?text=Lost+Found+Workflow)
+*Enhanced multi-user resolution system with finder and reporter roles.*
+
+**Workflow Steps:**
+1. **Report Lost Item**: User reports with photo and description
+2. **Community Visibility**: Item visible to all community members
+3. **Finder Action**: Any user can mark as "Found" with notes
+4. **Reporter Notification**: Original reporter receives notification
+5. **Resolution Confirmation**: Reporter confirms and marks as "Resolved"
 
 ### 🎮 **Virtual Reality Tour**
+![VR Tour Screen](https://via.placeholder.com/300x600/795548/FFFFFF?text=VR+Campus+Tour)
+*Immersive 360° campus experience with automated progression and interactive information.*
+
+**Key Features:**
 - **360° Campus Experience**: Immersive virtual tour
 - **Automated Progression**: Self-guided tour with smooth transitions
 - **Interactive Information**: Detailed location information
@@ -530,11 +582,27 @@ For easy sharing, you can:
 - **Progress Tracking**: Visual progress indicators
 
 ### 👤 **Profile & Settings**
+![Profile Screen](https://via.placeholder.com/300x600/3F51B5/FFFFFF?text=Profile+Settings)
+*Comprehensive user profile with activity tracking, achievements, and privacy controls.*
+
+**Key Features:**
 - **Comprehensive Profile**: User information and statistics
 - **Activity Tracking**: Events attended, clubs joined, items reported
 - **Achievement System**: Unlock achievements based on participation
 - **Privacy Controls**: Manage your data and privacy settings
 - **Account Management**: Secure login and profile updates
+- **Notification Bell**: Unread notification count with badge indicator
+
+### 📸 **Image Upload Features**
+![Image Upload](https://via.placeholder.com/300x600/E91E63/FFFFFF?text=Image+Upload)
+*Seamless image capture and upload system for Lost & Found items and club logos.*
+
+**Key Features:**
+- **Camera Integration**: Take photos directly within the app
+- **Gallery Selection**: Choose existing photos from device gallery
+- **Image Preview**: See selected image before uploading
+- **Firebase Storage**: Secure cloud storage for all uploaded images
+- **Automatic URL Generation**: Images automatically linked to items
 
 ---
 
