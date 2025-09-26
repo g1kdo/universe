@@ -602,52 +602,52 @@ For easy sharing, you can:
 *Experience the Universe app through these real screenshots showcasing all major features and screens.*
 
 ### 🏠 **Home & Navigation**
-![Home Dashboard](images/image1.jpeg)
+<img src="images/image1.jpeg" alt="Home Dashboard" width="300">
 *Main dashboard with user profile, search functionality, and category filters*
 
-![Maps Navigation](images/image2.jpeg)
+<img src="images/image2.jpeg" alt="Maps Navigation" width="300">
 *Interactive Google Maps with campus markers and GPS navigation*
 
 ### 📅 **Schedule & Events**
-![Schedule Management](images/image3.jpeg)
+<img src="images/image3.jpeg" alt="Schedule Management" width="300">
 *Personal calendar with event registration and date filtering*
 
-![Event Details](images/image4.jpeg)
+<img src="images/image4.jpeg" alt="Event Details" width="300">
 *Comprehensive event information and registration system*
 
 ### 🤝 **Community Features**
-![Community Hub](images/image5.jpeg)
+<img src="images/image5.jpeg" alt="Community Hub" width="300">
 *Lost & Found system and club management interface*
 
-![Lost & Found Items](images/image6.jpeg)
+<img src="images/image6.jpeg" alt="Lost & Found Items" width="300">
 *Report and manage lost items with image upload support*
 
-![Club Management](images/image7.jpeg)
+<img src="images/image7.jpeg" alt="Club Management" width="300">
 *Join clubs, manage memberships, and organize meetings*
 
 ### 🔔 **Notifications & Communication**
-![Notifications Screen](images/image8.jpeg)
+<img src="images/image8.jpeg" alt="Notifications Screen" width="300">
 *Smart notification system with real-time updates*
 
-![Notification Details](images/image9.jpeg)
+<img src="images/image9.jpeg" alt="Notification Details" width="300">
 *Detailed notification management and contextual actions*
 
 ### 📸 **Image Upload & Media**
-![Image Upload Interface](images/image10.jpeg)
+<img src="images/image10.jpeg" alt="Image Upload Interface" width="300">
 *Seamless photo capture and upload system*
 
-![Image Preview](images/image11.jpeg)
+<img src="images/image11.jpeg" alt="Image Preview" width="300">
 *Image preview and selection interface*
 
 ### 🎮 **Virtual Reality & Advanced Features**
-![VR Tour Interface](images/image12.jpeg)
+<img src="images/image12.jpeg" alt="VR Tour Interface" width="300">
 *Immersive 360° campus virtual reality tour*
 
-![VR Tour Experience](images/image13.jpeg)
+<img src="images/image13.jpeg" alt="VR Tour Experience" width="300">
 *Interactive VR campus exploration*
 
 ### 👤 **Profile & Settings**
-![Profile Screen](images/image14.jpeg)
+<img src="images/image14.jpeg" alt="Profile Screen" width="300">
 *Comprehensive user profile with activity tracking and settings*
 
 ---
