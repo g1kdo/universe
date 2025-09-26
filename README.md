@@ -601,54 +601,20 @@ For easy sharing, you can:
 
 *Experience the Universe app through these real screenshots showcasing all major features and screens.*
 
-### 🏠 **Home & Navigation**
-<img src="images/image1.jpeg" alt="Home Dashboard" width="300">
-*Main dashboard with user profile, search functionality, and category filters*
+| 🏠 **Home & Navigation** | 📅 **Schedule & Events** | 🤝 **Community Features** |
+|:---:|:---:|:---:|
+| <img src="images/image1.jpeg" alt="Home Dashboard" width="200"><br/>*Main dashboard with user profile, search functionality, and category filters* | <img src="images/image3.jpeg" alt="Schedule Management" width="200"><br/>*Personal calendar with event registration and date filtering* | <img src="images/image5.jpeg" alt="Community Hub" width="200"><br/>*Lost & Found system and club management interface* |
+| <img src="images/image2.jpeg" alt="Maps Navigation" width="200"><br/>*Interactive Google Maps with campus markers and GPS navigation* | <img src="images/image4.jpeg" alt="Event Details" width="200"><br/>*Comprehensive event information and registration system* | <img src="images/image6.jpeg" alt="Lost & Found Items" width="200"><br/>*Report and manage lost items with image upload support* |
+| | | <img src="images/image7.jpeg" alt="Club Management" width="200"><br/>*Join clubs, manage memberships, and organize meetings* |
 
-<img src="images/image2.jpeg" alt="Maps Navigation" width="100">
-*Interactive Google Maps with campus markers and GPS navigation*
+| 🔔 **Notifications & Communication** | 📸 **Image Upload & Media** | 🎮 **Virtual Reality & Advanced Features** |
+|:---:|:---:|:---:|
+| <img src="images/image8.jpeg" alt="Notifications Screen" width="200"><br/>*Smart notification system with real-time updates* | <img src="images/image10.jpeg" alt="Image Upload Interface" width="200"><br/>*Seamless photo capture and upload system* | <img src="images/image12.jpeg" alt="VR Tour Interface" width="200"><br/>*Immersive 360° campus virtual reality tour* |
+| <img src="images/image9.jpeg" alt="Notification Details" width="200"><br/>*Detailed notification management and contextual actions* | <img src="images/image11.jpeg" alt="Image Preview" width="200"><br/>*Image preview and selection interface* | <img src="images/image13.jpeg" alt="VR Tour Experience" width="200"><br/>*Interactive VR campus exploration* |
 
-### 📅 **Schedule & Events**
-<img src="images/image3.jpeg" alt="Schedule Management" width="300">
-*Personal calendar with event registration and date filtering*
-
-<img src="images/image4.jpeg" alt="Event Details" width="300">
-*Comprehensive event information and registration system*
-
-### 🤝 **Community Features**
-<img src="images/image5.jpeg" alt="Community Hub" width="300">
-*Lost & Found system and club management interface*
-
-<img src="images/image6.jpeg" alt="Lost & Found Items" width="300">
-*Report and manage lost items with image upload support*
-
-<img src="images/image7.jpeg" alt="Club Management" width="300">
-*Join clubs, manage memberships, and organize meetings*
-
-### 🔔 **Notifications & Communication**
-<img src="images/image8.jpeg" alt="Notifications Screen" width="300">
-*Smart notification system with real-time updates*
-
-<img src="images/image9.jpeg" alt="Notification Details" width="300">
-*Detailed notification management and contextual actions*
-
-### 📸 **Image Upload & Media**
-<img src="images/image10.jpeg" alt="Image Upload Interface" width="300">
-*Seamless photo capture and upload system*
-
-<img src="images/image11.jpeg" alt="Image Preview" width="300">
-*Image preview and selection interface*
-
-### 🎮 **Virtual Reality & Advanced Features**
-<img src="images/image12.jpeg" alt="VR Tour Interface" width="300">
-*Immersive 360° campus virtual reality tour*
-
-<img src="images/image13.jpeg" alt="VR Tour Experience" width="300">
-*Interactive VR campus exploration*
-
-### 👤 **Profile & Settings**
-<img src="images/image14.jpeg" alt="Profile Screen" width="300">
-*Comprehensive user profile with activity tracking and settings*
+| 👤 **Profile & Settings** |
+|:---:|
+| <img src="images/image14.jpeg" alt="Profile Screen" width="200"><br/>*Comprehensive user profile with activity tracking and settings* |
 
 ---
 
