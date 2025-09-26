@@ -27,9 +27,9 @@ Get Universe on your Android device instantly! The app is fully built and ready 
 
 | Download Method | Description | File Size | Best For |
 |----------------|-------------|-----------|----------|
-| **🔗 GitHub Releases** | [Download from releases](https://github.com/g1kdo/universe/releases) | 52.8MB | Quick installation |
-| **📱 QR Code** | Scan QR code above for instant download | 52.8MB | Mobile users |
-| **🛠️ Build Yourself** | Clone repo and build APK locally | 52.8MB | Developers |
+| **🔗 GitHub Releases** | [Download from releases](https://github.com/g1kdo/universe/releases) | 52.97MB | Quick installation |
+| **📱 QR Code** | Scan QR code above for instant download | 52.97MB | Mobile users |
+| **🛠️ Build Yourself** | Clone repo and build APK locally | 52.97MB | Developers |
 
 #### **🎯 Quick Installation Steps**
 1. **Download APK**: Get the latest `app-release.apk` file
@@ -57,7 +57,7 @@ Get Universe on your Android device instantly! The app is fully built and ready 
 
 ### **🚀 Download Options**
 
-**📁 File**: `app-release.apk` (52.8MB)  
+**📁 File**: `app-release.apk` (52.97MB)  
 **📱 Compatible**: Android 6.0+ (API level 23+)  
 **⏱️ Download Time**: ~2-5 minutes (depending on connection)
 
@@ -91,7 +91,7 @@ flutter build apk --release
 #### **📋 Current Status & Next Steps**
 
 **✅ What's Ready:**
-- APK successfully built (52.8MB)
+- APK successfully built (52.97MB)
 - All features working (Image Upload, Lost & Found, Club Management)
 - Repository contains all source code
 
@@ -444,7 +444,7 @@ For easy sharing, you can:
 ### 🚨 **Current Build Status**
 ✅ **APK Successfully Built!** The app has been successfully compiled and is ready for distribution.
 
-**Latest Build**: `app-release.apk` (52.8MB) - Production-ready release build with Notifications & Enhanced Workflow
+**Latest Build**: `app-release.apk` (52.97MB) - Production-ready release build with Notifications & Enhanced Workflow
 **New Features**: 
 - 🔔 Smart notification system for community updates
 - 🔍 Enhanced lost & found workflow with multi-user resolution
@@ -502,7 +502,6 @@ For easy sharing, you can:
 ## 📸 Application Screenshots
 
 ### 🏠 **Home Dashboard**
-![Home Dashboard](https://via.placeholder.com/300x600/2196F3/FFFFFF?text=Home+Dashboard)
 *Dynamic user profile with personalized welcome, global search functionality, and category filters for quick access to campus facilities.*
 
 **Key Features:**
@@ -513,7 +512,6 @@ For easy sharing, you can:
 - **Smart Recommendations**: Personalized content based on user activity
 
 ### 🗺️ **Maps & Navigation**
-![Maps Screen](https://via.placeholder.com/300x600/4CAF50/FFFFFF?text=Maps+Navigation)
 *Interactive Google Maps integration with real-time GPS tracking, campus markers, and multi-modal directions.*
 
 **Key Features:**
@@ -524,7 +522,6 @@ For easy sharing, you can:
 - **Search Integration**: Find any location on campus instantly
 
 ### 📅 **Schedule Management**
-![Schedule Screen](https://via.placeholder.com/300x600/FF9800/FFFFFF?text=Schedule+Management)
 *Personal calendar with event registration, date-based filtering, and comprehensive event details.*
 
 **Key Features:**
@@ -535,7 +532,6 @@ For easy sharing, you can:
 - **Reminder System**: Never miss important events
 
 ### 🤝 **Community Hub**
-![Community Screen](https://via.placeholder.com/300x600/9C27B0/FFFFFF?text=Community+Hub)
 *Lost & Found system with image upload, club management, and smart notification system.*
 
 **Key Features:**
@@ -549,7 +545,6 @@ For easy sharing, you can:
 - **Real-time Updates**: Live community activity feed with notification badges
 
 ### 🔔 **Notifications Screen**
-![Notifications Screen](https://via.placeholder.com/300x600/FF5722/FFFFFF?text=Notifications)
 *Smart notification system with real-time updates, unread count badges, and contextual actions.*
 
 **Key Features:**
@@ -560,7 +555,6 @@ For easy sharing, you can:
 - **Persistent Storage**: Notifications stored securely in Firestore
 
 ### 📱 **Lost & Found Workflow**
-![Lost & Found Workflow](https://via.placeholder.com/300x600/607D8B/FFFFFF?text=Lost+Found+Workflow)
 *Enhanced multi-user resolution system with finder and reporter roles.*
 
 **Workflow Steps:**
@@ -571,7 +565,6 @@ For easy sharing, you can:
 5. **Resolution Confirmation**: Reporter confirms and marks as "Resolved"
 
 ### 🎮 **Virtual Reality Tour**
-![VR Tour Screen](https://via.placeholder.com/300x600/795548/FFFFFF?text=VR+Campus+Tour)
 *Immersive 360° campus experience with automated progression and interactive information.*
 
 **Key Features:**
@@ -582,7 +575,6 @@ For easy sharing, you can:
 - **Progress Tracking**: Visual progress indicators
 
 ### 👤 **Profile & Settings**
-![Profile Screen](https://via.placeholder.com/300x600/3F51B5/FFFFFF?text=Profile+Settings)
 *Comprehensive user profile with activity tracking, achievements, and privacy controls.*
 
 **Key Features:**
@@ -594,7 +586,6 @@ For easy sharing, you can:
 - **Notification Bell**: Unread notification count with badge indicator
 
 ### 📸 **Image Upload Features**
-![Image Upload](https://via.placeholder.com/300x600/E91E63/FFFFFF?text=Image+Upload)
 *Seamless image capture and upload system for Lost & Found items and club logos.*
 
 **Key Features:**
@@ -603,6 +594,61 @@ For easy sharing, you can:
 - **Image Preview**: See selected image before uploading
 - **Firebase Storage**: Secure cloud storage for all uploaded images
 - **Automatic URL Generation**: Images automatically linked to items
+
+---
+
+## 📱 **App Screenshots Gallery**
+
+*Experience the Universe app through these real screenshots showcasing all major features and screens.*
+
+### 🏠 **Home & Navigation**
+![Home Dashboard](images/image1.jpeg)
+*Main dashboard with user profile, search functionality, and category filters*
+
+![Maps Navigation](images/image2.jpeg)
+*Interactive Google Maps with campus markers and GPS navigation*
+
+### 📅 **Schedule & Events**
+![Schedule Management](images/image3.jpeg)
+*Personal calendar with event registration and date filtering*
+
+![Event Details](images/image4.jpeg)
+*Comprehensive event information and registration system*
+
+### 🤝 **Community Features**
+![Community Hub](images/image5.jpeg)
+*Lost & Found system and club management interface*
+
+![Lost & Found Items](images/image6.jpeg)
+*Report and manage lost items with image upload support*
+
+![Club Management](images/image7.jpeg)
+*Join clubs, manage memberships, and organize meetings*
+
+### 🔔 **Notifications & Communication**
+![Notifications Screen](images/image8.jpeg)
+*Smart notification system with real-time updates*
+
+![Notification Details](images/image9.jpeg)
+*Detailed notification management and contextual actions*
+
+### 📸 **Image Upload & Media**
+![Image Upload Interface](images/image10.jpeg)
+*Seamless photo capture and upload system*
+
+![Image Preview](images/image11.jpeg)
+*Image preview and selection interface*
+
+### 🎮 **Virtual Reality & Advanced Features**
+![VR Tour Interface](images/image12.jpeg)
+*Immersive 360° campus virtual reality tour*
+
+![VR Tour Experience](images/image13.jpeg)
+*Interactive VR campus exploration*
+
+### 👤 **Profile & Settings**
+![Profile Screen](images/image14.jpeg)
+*Comprehensive user profile with activity tracking and settings*
 
 ---
 
@@ -1025,7 +1071,7 @@ SOFTWARE.
 - **🏛️ Club Logo Support**: Upload custom logos for clubs and organizations
 - **📱 Enhanced UX**: Simplified Lost Item reporting (defaults to "Lost" type)
 - **🔧 Firebase Storage**: Secure cloud storage integration for all images
-- **⚡ Performance**: Optimized build size (52.8MB) with improved performance
+- **⚡ Performance**: Optimized build size (52.97MB) with improved performance
 - **🛠️ Bug Fixes**: Resolved all compilation errors and improved stability
 - **🎨 UI Improvements**: Fixed club card layout issues and improved responsiveness
 
