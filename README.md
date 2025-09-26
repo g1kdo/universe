@@ -605,7 +605,7 @@ For easy sharing, you can:
 <img src="images/image1.jpeg" alt="Home Dashboard" width="300">
 *Main dashboard with user profile, search functionality, and category filters*
 
-<img src="images/image2.jpeg" alt="Maps Navigation" width="300">
+<img src="images/image2.jpeg" alt="Maps Navigation" width="100">
 *Interactive Google Maps with campus markers and GPS navigation*
 
 ### 📅 **Schedule & Events**
