@@ -380,24 +380,34 @@ class _EventDetailsModalState extends ConsumerState<EventDetailsModal> {
                         child: Row(
                           children: [
                             Icon(
-                              isRegistered ? Icons.check_circle : Icons.event_available,
-                              color: isRegistered 
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              isEventPast 
+                                  ? Icons.event_busy
+                                  : isRegistered 
+                                      ? Icons.check_circle 
+                                      : Icons.event_available,
+                              color: isEventPast
+                                  ? Colors.grey
+                                  : isRegistered 
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                isRegistered 
-                                    ? 'You are registered for this event'
-                                    : isEventFull 
-                                        ? 'Event is full'
-                                        : 'You are not registered for this event',
+                                isEventPast
+                                    ? 'This event has passed'
+                                    : isRegistered 
+                                        ? 'You are registered for this event'
+                                        : isEventFull 
+                                            ? 'Event is full'
+                                            : 'You are not registered for this event',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: isRegistered 
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                                  color: isEventPast
+                                      ? Colors.grey
+                                      : isRegistered 
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                   fontWeight: isRegistered ? FontWeight.w500 : FontWeight.normal,
                                 ),
                               ),
@@ -443,18 +453,8 @@ class _EventDetailsModalState extends ConsumerState<EventDetailsModal> {
 
                   // Action Buttons
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          'Close',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
                       if (_auth.currentUser != null && !isEventPast)
                         ElevatedButton.icon(
                           onPressed: _isRegistering ? null : _toggleRegistration,
@@ -472,7 +472,7 @@ class _EventDetailsModalState extends ConsumerState<EventDetailsModal> {
                                   size: 18,
                                 ),
                           label: Text(
-                            _isRegistering 
+                            _isRegistering
                                 ? 'Processing...'
                                 : isRegistered 
                                     ? 'Unregister'
@@ -487,6 +487,32 @@ class _EventDetailsModalState extends ConsumerState<EventDetailsModal> {
                             foregroundColor: isRegistered 
                                 ? Theme.of(context).colorScheme.onError
                                 : Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        )
+                      else if (isEventPast)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.event_busy,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Event Passed',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],

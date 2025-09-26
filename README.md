@@ -104,19 +104,19 @@ flutter build apk --release
 1. **Create a GitHub Release**:
    ```bash
    # Tag the current version (✅ DONE)
-   git tag -a v1.0 -m "Universe v1.0 with Image Upload"
-   git push origin v1.0
+   git tag -a v1.1 -m "Universe v1.1 with Notifications & Enhanced Workflow"
+   git push origin v1.1
    ```
 
 2. **Upload APK to Release**:
    - Go to [GitHub Releases](https://github.com/g1kdo/universe/releases)
    - Click "Create a new release"
-   - Select the `v1.0` tag
+   - Select the `v1.1` tag
    - Upload `build/app/outputs/flutter-apk/app-release.apk`
    - Publish the release
 
 3. **Result**:
-   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v1.0/app-release.apk`
+   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v1.1/app-release.apk`
    - QR code will work for public downloads
    - Users can download without building
 
@@ -160,8 +160,10 @@ flutter build apk --release
 ### 🤝 **Community Building**
 | Feature | Description | Tech Stack |
 |---------|-------------|------------|
-| **Lost & Found System** | Report and claim lost items with image upload support | Firestore, Firebase Storage, Image Picker |
+| **Lost & Found System** | Report and claim lost items with image upload support and smart workflow | Firestore, Firebase Storage, Image Picker, Notification System |
 | **Club Management** | Join clubs, manage memberships, organize meetings with logo upload | CRUD Operations, Member Management, Image Upload |
+| **Smart Notification System** | Real-time notifications for lost items, club updates, and community events | Firebase Cloud Messaging, Firestore Listeners |
+| **Lost & Found Workflow** | Multi-user resolution system where finders can mark items as found and reporters confirm resolution | Advanced State Management, User Role Handling |
 | **Anonymous Reporting** | Safe reporting system for campus issues | Secure Forms, Privacy Protection |
 | **Community Stats** | Track participation and engagement metrics | Analytics, User Statistics |
 
@@ -434,13 +436,16 @@ For easy sharing, you can:
 ### 🚨 **Current Build Status**
 ✅ **APK Successfully Built!** The app has been successfully compiled and is ready for distribution.
 
-**Latest Build**: `app-release.apk` (52.8MB) - Production-ready release build with Image Upload features
+**Latest Build**: `app-release.apk` (52.8MB) - Production-ready release build with Notifications & Enhanced Workflow
 **New Features**: 
+- 🔔 Smart notification system for community updates
+- 🔍 Enhanced lost & found workflow with multi-user resolution
 - 📸 Image upload for Lost & Found items
 - 🏛️ Club logo upload functionality
 - 🔧 Firebase Storage integration
 - 📱 Enhanced user experience
 - 🎯 Simplified Lost Item reporting (defaults to "Lost" type)
+- 🎨 Fixed club card layout and improved responsiveness
 
 **Location**: `build/app/outputs/flutter-apk/app-release.apk`
 
@@ -530,6 +535,88 @@ For easy sharing, you can:
 - **Achievement System**: Unlock achievements based on participation
 - **Privacy Controls**: Manage your data and privacy settings
 - **Account Management**: Secure login and profile updates
+
+---
+
+## 🔔 **New Feature: Smart Notification System**
+
+### 🚀 **Real-time Community Notifications**
+Universe now includes a comprehensive notification system that keeps users informed about important community activities and updates:
+
+#### **📱 Notification Types**
+- **Lost & Found Updates**: Notifications when someone finds your lost item
+- **Club Invitations**: Invitations to join clubs and organizations
+- **Event Reminders**: Upcoming event notifications and reminders
+- **Community Announcements**: Important campus-wide announcements
+- **Resolution Confirmations**: Notifications when lost items are resolved
+
+#### **🔧 Technical Implementation**
+```dart
+// Notification Service
+class NotificationService {
+  Stream<List<NotificationModel>> getNotifications() {
+    // Real-time notification stream
+  }
+  
+  Future<void> addNotification(NotificationModel notification) async {
+    // Add new notification to Firestore
+  }
+  
+  Stream<int> getUnreadNotificationsCount() {
+    // Live unread count updates
+  }
+}
+```
+
+#### **✨ Key Features**
+- **Real-time Updates**: Instant notifications using Firestore listeners
+- **Unread Count Badge**: Visual indicator of unread notifications
+- **Notification Management**: Mark as read, delete, and organize notifications
+- **Contextual Actions**: Tap notifications to navigate to related content
+- **Persistent Storage**: Notifications stored securely in Firestore
+
+---
+
+## 🔍 **Enhanced Lost & Found Workflow**
+
+### 🎯 **Smart Multi-User Resolution System**
+The Lost & Found system now features an intelligent workflow that involves multiple users in the resolution process:
+
+#### **📋 Workflow Steps**
+1. **Report Lost Item**: User reports a lost item with photo and description
+2. **Community Visibility**: Item becomes visible to all community members
+3. **Finder Action**: Any user can mark the item as "Found" with notes
+4. **Reporter Notification**: Original reporter receives notification about the find
+5. **Resolution Confirmation**: Reporter confirms the resolution and marks as "Resolved"
+
+#### **🔄 State Management**
+```dart
+// Lost & Found Item States
+enum ItemStatus {
+  lost,           // Initially reported as lost
+  foundByOther,   // Someone else found it
+  resolved        // Reporter confirmed resolution
+}
+```
+
+#### **👥 User Roles & Permissions**
+- **Reporter**: Can update item details and confirm resolution
+- **Finder**: Can mark items as found and add finding notes
+- **Community**: Can view all items and participate in resolution
+- **Admins**: Can manage and moderate all items
+
+#### **🔔 Notification Integration**
+- **Automatic Notifications**: System automatically notifies relevant users
+- **Contextual Messages**: Different notification types for different actions
+- **Real-time Updates**: Instant notifications using Firestore listeners
+- **Unread Tracking**: Visual indicators for unread notifications
+
+#### **✨ Benefits**
+- **Community Engagement**: Encourages community participation
+- **Faster Resolution**: Multiple users can help resolve lost items
+- **Transparency**: Clear workflow with status tracking
+- **User Satisfaction**: Proactive notifications keep users informed
+- **Efficient Management**: Automated workflow reduces manual intervention
 
 ---
 
@@ -861,17 +948,20 @@ SOFTWARE.
 
 ---
 
-## 🆕 **Latest Updates (v1.0)**
+## 🆕 **Latest Updates (v1.1)**
 
 ### ✨ **What's New**
+- **🔔 Smart Notification System**: Real-time notifications for lost items, club updates, and community events
+- **🔍 Enhanced Lost & Found Workflow**: Multi-user resolution system with finder and reporter roles
 - **📸 Image Upload System**: Complete image upload functionality for Lost & Found and Club Management
 - **🏛️ Club Logo Support**: Upload custom logos for clubs and organizations
 - **📱 Enhanced UX**: Simplified Lost Item reporting (defaults to "Lost" type)
 - **🔧 Firebase Storage**: Secure cloud storage integration for all images
 - **⚡ Performance**: Optimized build size (52.8MB) with improved performance
 - **🛠️ Bug Fixes**: Resolved all compilation errors and improved stability
+- **🎨 UI Improvements**: Fixed club card layout issues and improved responsiveness
 
 ### 🎯 **Ready to Use**
-The app is now fully functional with all image upload features ready for production use. Simply set up Firebase Storage following the provided guides and start using the enhanced community features!
+The app is now fully functional with all image upload features, notification system, and enhanced lost & found workflow ready for production use. Simply set up Firebase Storage and Firestore following the provided guides and start using the enhanced community features!
 
 *Built with ❤️ for students, by students.*

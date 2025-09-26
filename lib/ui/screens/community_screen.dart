@@ -57,14 +57,33 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
 
 
   Future<void> _resolveLostFoundItem(String itemId) async {
-    final notes = await _showResolveDialog();
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    // Get the item to determine the action
+    final itemDoc = await _firestoreService.getLostFoundItemById(itemId);
+    if (itemDoc == null) return;
+
+    final isOwner = user.uid == itemDoc.reporterId;
+
+    if (isOwner && itemDoc.isFoundByOther) {
+      // Reporter confirming the item as resolved
+      await _confirmItemAsResolved(itemId);
+    } else if (!isOwner && !itemDoc.isFoundByOther && !itemDoc.isResolved) {
+      // Someone else marking the item as found
+      await _markItemAsFound(itemId);
+    }
+  }
+
+  Future<void> _markItemAsFound(String itemId) async {
+    final notes = await _showFoundDialog();
     if (notes != null) {
       try {
-        _setLoading('resolve_lost_found_$itemId', true);
-        await _firestoreService.resolveLostFoundItem(itemId, notes);
+        _setLoading('mark_found_$itemId', true);
+        await _firestoreService.markItemAsFound(itemId, notes);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Item marked as resolved!')),
+            const SnackBar(content: Text('Item marked as found! The reporter will be notified.')),
           );
         }
       } catch (e) {
@@ -74,7 +93,30 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
           );
         }
       } finally {
-        _setLoading('resolve_lost_found_$itemId', false);
+        _setLoading('mark_found_$itemId', false);
+      }
+    }
+  }
+
+  Future<void> _confirmItemAsResolved(String itemId) async {
+    final confirmed = await _showConfirmResolveDialog();
+    if (confirmed == true) {
+      try {
+        _setLoading('confirm_resolved_$itemId', true);
+        await _firestoreService.confirmItemAsResolved(itemId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item confirmed as resolved!')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.toString()}')),
+          );
+        }
+      } finally {
+        _setLoading('confirm_resolved_$itemId', false);
       }
     }
   }
@@ -170,19 +212,30 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
   }
 
   // Dialog methods
-  Future<String?> _showResolveDialog() async {
+  Future<String?> _showFoundDialog() async {
     final controller = TextEditingController();
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Mark as Resolved'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Resolution Notes',
-            hintText: 'How was this resolved?',
-          ),
-          maxLines: 3,
+        title: const Text('I Found This Item'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Please provide details about where and how you found this item:',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Found Details',
+                hintText: 'Where did you find it? How can the owner contact you?',
+              ),
+              maxLines: 4,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -191,7 +244,29 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Resolve'),
+            child: const Text('Mark as Found'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _showConfirmResolveDialog() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Item as Resolved'),
+        content: const Text(
+          'Someone has found your item. Do you want to confirm that it has been resolved?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirm Resolved'),
           ),
         ],
       ),
@@ -474,6 +549,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
         StreamBuilder<List<Club>>(
           stream: _clubsStream,
           builder: (context, snapshot) {
+            
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
@@ -520,7 +596,7 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
                   crossAxisCount: 2,
                   crossAxisSpacing: 12.0,
                   mainAxisSpacing: 12.0,
-                  childAspectRatio: 0.75,
+                  childAspectRatio: 0.75, // Reverted to original ratio
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {

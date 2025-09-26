@@ -167,6 +167,9 @@ class _EventCardState extends State<EventCard> {
     final categoryIcon = _getCategoryIcon(widget.event.category);
     final categoryColor = _getCategoryColor(widget.event.category);
     final formattedDate = DateFormat('MMM dd, yyyy').format(widget.event.date);
+    final now = DateTime.now();
+    final eventDate = widget.event.date;
+    final isEventPassed = eventDate.isBefore(now);
 
     return GestureDetector(
       onTap: () {
@@ -286,30 +289,48 @@ class _EventCardState extends State<EventCard> {
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _toggleRegistration,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isRegistered ? Colors.red : Colors.blue,
-                    foregroundColor: Colors.white,
+                // Show different button based on event status
+                if (isEventPassed)
+                  Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                    child: Text(
+                      'Passed',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _toggleRegistration,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isRegistered ? Colors.red : Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                            ),
+                          )
+                        : Text(
+                            _isRegistered ? 'Unregister' : 'Register',
+                            style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary),
                           ),
-                        )
-                      : Text(
-                          _isRegistered ? 'Unregister' : 'Register',
-                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimary),
-                        ),
-                ),
+                  ),
               ],
             ),
           ],

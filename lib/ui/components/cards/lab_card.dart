@@ -66,7 +66,7 @@ class LabCard extends StatelessWidget {
           children: [
             // Icon Header
             Container(
-              height: 100,
+              height: 90, // Reduced from 100 to give more space for content
               width: double.infinity,
               decoration: BoxDecoration(
                 color: labColor.withValues(alpha: 0.1),
@@ -77,21 +77,21 @@ class LabCard extends StatelessWidget {
                 children: [
                   Icon(
                     labIcon,
-                    size: 40,
+                    size: 35, // Reduced from 40
                     color: labColor,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced from 8
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), // Reduced padding
                     decoration: BoxDecoration(
                       color: labColor,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10), // Reduced from 12
                     ),
                     child: Text(
                       lab.category.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 9, // Reduced from 10
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -99,81 +99,98 @@ class LabCard extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    lab.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          lab.floor,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.people,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          lab.accommodation,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        lab.isAvailable ? Icons.check_circle : Icons.cancel,
-                        size: 14,
-                        color: lab.isAvailable ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        lab.isAvailable ? 'Available' : 'Unavailable',
+            Expanded( // Make content area flexible
+              child: Padding(
+                padding: const EdgeInsets.all(10.0), // Reduced padding
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute space evenly
+                  children: [
+                    // Lab name with better text handling
+                    Flexible(
+                      child: Text(
+                        lab.name,
                         style: TextStyle(
-                          color: lab.isAvailable ? Colors.green : Colors.red,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15, // Slightly reduced
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
+                        maxLines: 3, // Increased from 2 to 3
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Location info
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 12, // Reduced size
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            lab.floor,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
+                              fontSize: 12, // Reduced from 14
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Accommodation info
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.people,
+                          size: 12, // Reduced size
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            lab.accommodation,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
+                              fontSize: 11, // Reduced from 12
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Availability status
+                    Row(
+                      children: [
+                        Icon(
+                          lab.isAvailable ? Icons.check_circle : Icons.cancel,
+                          size: 12, // Reduced size
+                          color: lab.isAvailable ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            lab.isAvailable ? 'Available' : 'Unavailable',
+                            style: TextStyle(
+                              color: lab.isAvailable ? Colors.green : Colors.red,
+                              fontSize: 11, // Reduced from 12
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

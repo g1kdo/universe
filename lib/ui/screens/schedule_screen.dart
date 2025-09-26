@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:universe/ui/components/cards/schedule_card.dart';
 import 'package:universe/services/firestore_service.dart';
 import 'package:universe/models/user_schedule_model.dart';
+import 'package:universe/ui/screens/notifications_screen.dart';
+import 'package:universe/services/notification_service.dart';
 
 class ScheduleScreen extends ConsumerStatefulWidget {
   const ScheduleScreen({super.key});
@@ -67,10 +69,53 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.notifications_none, color: Theme.of(context).colorScheme.onSurface),
-                    onPressed: () {
-                      // TODO: Handle notifications
+                  StreamBuilder<int>(
+                    stream: NotificationService().getUnreadNotificationsCount(),
+                    builder: (context, snapshot) {
+                      final unreadCount = snapshot.data ?? 0;
+                      return Stack(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              unreadCount > 0 ? Icons.notifications : Icons.notifications_none,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NotificationsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  unreadCount > 99 ? '99+' : unreadCount.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
                     },
                   ),
                 ],

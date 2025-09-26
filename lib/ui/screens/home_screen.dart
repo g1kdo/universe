@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedNewsEventsTab = 'News';
   int _bottomNavIndex = 0; // State for bottom navigation
   String _searchQuery = ''; // Global search query
+  bool _showFilters = true; // State to control filter chips visibility
 
   final FirestoreService _firestoreService = FirestoreService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -71,12 +72,22 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Lab> _filterLabs(List<Lab> labs) {
     List<Lab> filteredLabs = labs;
 
-    // Filter by category
-    if (_selectedFilter != 'Labs') {
-      filteredLabs = labs.where((lab) => 
-        lab.category.toLowerCase() == _selectedFilter.toLowerCase()
-      ).toList();
+    // Only apply category filtering if filters are visible
+    if (_showFilters) {
+      // Filter by category
+      if (_selectedFilter == 'Labs') {
+        // When "Labs" is selected, show only labs with "lab" category
+        filteredLabs = labs.where((lab) => 
+          lab.category.toLowerCase() == 'lab'
+        ).toList();
+      } else {
+        // For other filters, match the selected filter with the category
+        filteredLabs = labs.where((lab) => 
+          lab.category.toLowerCase() == _selectedFilter.toLowerCase()
+        ).toList();
+      }
     }
+    // If filters are hidden, show all labs (no category filtering)
 
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
@@ -122,6 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String _getSectionTitle() {
     if (_searchQuery.isNotEmpty) {
       return 'SEARCH RESULTS';
+    }
+    if (!_showFilters) {
+      return 'ALL FACILITIES';
     }
     return _selectedFilter.toUpperCase();
   }
@@ -215,24 +229,28 @@ class _HomeScreenState extends State<HomeScreen> {
             // Search Bar Component
             SearchBarWidget(
               controller: _searchController,
+              showFilters: _showFilters,
               onFilterPressed: () {
-                // TODO: Implement filter functionality
-                  // Filter button pressed!
+                setState(() {
+                  _showFilters = !_showFilters;
+                });
               },
             ),
             const SizedBox(height: 20),
 
-            // Filter Chips Section Component
-            FilterChipsSection(
-              selectedFilter: _selectedFilter,
-              onFilterSelected: (filter) {
-                setState(() {
-                  _selectedFilter = filter;
-                });
-              },
-              filters: _filterChips,
-            ),
-            const SizedBox(height: 20),
+            // Filter Chips Section Component (only show when filters are visible)
+            if (_showFilters) ...[
+              FilterChipsSection(
+                selectedFilter: _selectedFilter,
+                onFilterSelected: (filter) {
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                },
+                filters: _filterChips,
+              ),
+              const SizedBox(height: 20),
+            ],
 
             // Labs Section Component with Firestore data
             StreamBuilder<List<Lab>>(

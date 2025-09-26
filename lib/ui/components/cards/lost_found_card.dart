@@ -97,24 +97,36 @@ class LostFoundCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   // Actions for owner
-                  if (isOwner && !item.isResolved) ...[
+                  if (isOwner && !item.isResolved && !item.isFoundByOther) ...[
                     if (onEdit != null)
                       IconButton(
                         icon: Icon(Icons.edit, size: 20, color: Theme.of(context).colorScheme.onSurface),
                         onPressed: onEdit,
                         tooltip: 'Edit',
                       ),
-                    if (onResolve != null)
-                      IconButton(
-                        icon: Icon(Icons.check_circle, size: 20, color: Colors.green),
-                        onPressed: onResolve,
-                        tooltip: 'Mark as Resolved',
-                      ),
                     if (onDelete != null)
                       IconButton(
                         icon: Icon(Icons.delete, size: 20, color: Colors.red),
                         onPressed: onDelete,
                         tooltip: 'Delete',
+                      ),
+                  ],
+                  // Actions for other users (not the reporter)
+                  if (!isOwner && !item.isResolved && !item.isFoundByOther && item.type == 'lost') ...[
+                    if (onResolve != null)
+                      IconButton(
+                        icon: Icon(Icons.search, size: 20, color: Colors.blue),
+                        onPressed: onResolve,
+                        tooltip: 'I Found This Item',
+                      ),
+                  ],
+                  // Actions for reporter when item is found by someone else
+                  if (isOwner && item.isFoundByOther && !item.isResolved) ...[
+                    if (onResolve != null)
+                      IconButton(
+                        icon: Icon(Icons.check_circle, size: 20, color: Colors.green),
+                        onPressed: onResolve,
+                        tooltip: 'Confirm Found',
                       ),
                   ],
                 ],
@@ -209,6 +221,37 @@ class LostFoundCard extends StatelessWidget {
                   ),
                 ],
               ),
+              
+              // Found by someone else status
+              if (item.isFoundByOther && !item.isResolved) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.person_search,
+                        size: 16,
+                        color: Colors.orange,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Found by someone - Awaiting confirmation',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               
               // Resolved status
               if (item.isResolved) ...[

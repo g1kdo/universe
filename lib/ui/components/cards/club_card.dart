@@ -78,26 +78,27 @@ class ClubCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SizedBox(
+            height: 200, // Fixed height for consistent card size
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Header with category and actions
               Row(
                 children: [
                   // Category badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
                       color: categoryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           _getCategoryIcon(club.category),
-                          size: 12,
+                          size: 10,
                           color: categoryColor,
                         ),
                         const SizedBox(width: 2),
@@ -122,17 +123,17 @@ class ClubCard extends StatelessWidget {
                           GestureDetector(
                             onTap: onEdit,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(Icons.edit, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
+                              padding: const EdgeInsets.all(3),
+                              child: Icon(Icons.edit, size: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6)),
                             ),
                           ),
                         if (onDelete != null) ...[
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 2),
                           GestureDetector(
                             onTap: onDelete,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(Icons.delete, size: 14, color: Colors.red),
+                              padding: const EdgeInsets.all(3),
+                              child: Icon(Icons.delete, size: 12, color: Colors.red),
                             ),
                           ),
                         ],
@@ -148,7 +149,7 @@ class ClubCard extends StatelessWidget {
                 children: [
                   // Logo
                   CircleAvatar(
-                    radius: 20,
+                    radius: 18,
                     backgroundColor: categoryColor.withValues(alpha: 0.1),
                     backgroundImage: club.logoUrl != null 
                         ? NetworkImage(club.logoUrl!) 
@@ -157,7 +158,7 @@ class ClubCard extends StatelessWidget {
                         ? Icon(
                             _getCategoryIcon(club.category),
                             color: categoryColor,
-                            size: 20,
+                            size: 18,
                           )
                         : null,
                   ),
@@ -166,6 +167,7 @@ class ClubCard extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           club.name,
@@ -173,7 +175,7 @@ class ClubCard extends StatelessWidget {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
@@ -181,7 +183,7 @@ class ClubCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.people,
-                              size: 12,
+                              size: 10,
                               color: Colors.grey[600],
                             ),
                             const SizedBox(width: 2),
@@ -192,6 +194,7 @@ class ClubCard extends StatelessWidget {
                                   fontSize: 10,
                                   color: Colors.grey[600],
                                 ),
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -205,16 +208,14 @@ class ClubCard extends StatelessWidget {
               const SizedBox(height: 6),
 
               // Description
-              Expanded(
-                child: Text(
-                  club.description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                club.description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[700],
                 ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
 
@@ -224,10 +225,10 @@ class ClubCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.schedule,
-                      size: 12,
+                      size: 10,
                       color: Colors.grey[600],
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                     Expanded(
                       child: Text(
                         club.meetingSchedule,
@@ -241,7 +242,7 @@ class ClubCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
               ],
 
               // President info (compact)
@@ -249,10 +250,10 @@ class ClubCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.person,
-                    size: 12,
+                    size: 10,
                     color: Colors.grey[600],
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 3),
                   Expanded(
                     child: Text(
                       club.presidentName,
@@ -268,22 +269,25 @@ class ClubCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
 
+              // Spacer to push button to bottom
+              const Spacer(),
+
               // Join/Leave button
               if (!isOwner) ...[
                 SizedBox(
                   width: double.infinity,
-                  height: 28,
+                  height: 26,
                   child: ElevatedButton(
                     onPressed: isLoading ? null : (isMember ? onLeave : onJoin),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isMember ? Colors.red : categoryColor,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(vertical: 3),
                     ),
                     child: isLoading
                         ? const SizedBox(
-                            height: 12,
-                            width: 12,
+                            height: 10,
+                            width: 10,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -298,11 +302,11 @@ class ClubCard extends StatelessWidget {
               ] else ...[
                 Container(
                   width: double.infinity,
-                  height: 28,
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  height: 26,
+                  padding: const EdgeInsets.symmetric(vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     'President',
@@ -311,14 +315,15 @@ class ClubCard extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 }

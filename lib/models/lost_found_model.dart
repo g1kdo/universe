@@ -18,6 +18,10 @@ class LostFoundItem {
   final String? resolvedBy; // User ID who resolved it
   final DateTime? resolvedAt;
   final String? notes; // Additional notes
+  final String? foundBy; // User ID who found the item (different from resolvedBy)
+  final DateTime? foundAt; // When the item was found by someone else
+  final String? foundNotes; // Notes from the person who found it
+  final bool isFoundByOther; // Whether someone else found the item (awaiting reporter confirmation)
 
   LostFoundItem({
     required this.id,
@@ -36,6 +40,10 @@ class LostFoundItem {
     this.resolvedBy,
     this.resolvedAt,
     this.notes,
+    this.foundBy,
+    this.foundAt,
+    this.foundNotes,
+    this.isFoundByOther = false,
   });
 
   factory LostFoundItem.fromMap(Map<String, dynamic> map, String id) {
@@ -58,6 +66,12 @@ class LostFoundItem {
           ? (map['resolvedAt'] as Timestamp).toDate() 
           : null,
       notes: map['notes'],
+      foundBy: map['foundBy'],
+      foundAt: map['foundAt'] != null 
+          ? (map['foundAt'] as Timestamp).toDate() 
+          : null,
+      foundNotes: map['foundNotes'],
+      isFoundByOther: map['isFoundByOther'] ?? false,
     );
   }
 
@@ -78,6 +92,10 @@ class LostFoundItem {
       'resolvedBy': resolvedBy,
       'resolvedAt': resolvedAt != null ? Timestamp.fromDate(resolvedAt!) : null,
       'notes': notes,
+      'foundBy': foundBy,
+      'foundAt': foundAt != null ? Timestamp.fromDate(foundAt!) : null,
+      'foundNotes': foundNotes,
+      'isFoundByOther': isFoundByOther,
     };
   }
 
@@ -98,6 +116,10 @@ class LostFoundItem {
     String? resolvedBy,
     DateTime? resolvedAt,
     String? notes,
+    String? foundBy,
+    DateTime? foundAt,
+    String? foundNotes,
+    bool? isFoundByOther,
   }) {
     return LostFoundItem(
       id: id ?? this.id,
@@ -116,6 +138,10 @@ class LostFoundItem {
       resolvedBy: resolvedBy ?? this.resolvedBy,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       notes: notes ?? this.notes,
+      foundBy: foundBy ?? this.foundBy,
+      foundAt: foundAt ?? this.foundAt,
+      foundNotes: foundNotes ?? this.foundNotes,
+      isFoundByOther: isFoundByOther ?? this.isFoundByOther,
     );
   }
 }

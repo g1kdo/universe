@@ -37,7 +37,7 @@ class LabsSection extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16.0,
             mainAxisSpacing: 16.0,
-            childAspectRatio: 0.8,
+            childAspectRatio: 0.75, // Reduced from 0.8 to give more height
           ),
           itemCount: labs.length,
           itemBuilder: (context, index) {

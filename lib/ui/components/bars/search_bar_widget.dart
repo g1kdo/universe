@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 class SearchBarWidget extends StatelessWidget {
   final VoidCallback onFilterPressed;
   final TextEditingController? controller;
+  final bool showFilters;
 
   const SearchBarWidget({
     super.key,
     required this.onFilterPressed,
     this.controller,
+    this.showFilters = true,
   });
 
   @override
@@ -41,11 +43,16 @@ class SearchBarWidget extends StatelessWidget {
           onTap: onFilterPressed,
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: showFilters 
+                  ? Theme.of(context).colorScheme.primary 
+                  : Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.all(12),
-            child: Icon(Icons.filter_list, color: Theme.of(context).colorScheme.onPrimary),
+            child: Icon(
+              showFilters ? Icons.filter_list : Icons.filter_list_off,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
           ),
         ),
       ],

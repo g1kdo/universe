@@ -7,6 +7,7 @@ import '../models/news_model.dart';
 import '../models/user_schedule_model.dart';
 import '../models/lost_found_model.dart';
 import '../models/club_model.dart';
+import 'notification_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -254,6 +255,18 @@ class FirestoreService {
     });
   }
 
+  Future<LostFoundItem?> getLostFoundItemById(String itemId) async {
+    try {
+      final doc = await _firestore.collection('lostFoundItems').doc(itemId).get();
+      if (doc.exists) {
+        return LostFoundItem.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<String> addLostFoundItem(LostFoundItem item) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to report an item');
@@ -279,6 +292,83 @@ class FirestoreService {
     await _firestore.collection('lostFoundItems').doc(item.id).update(item.toMap());
   }
 
+  // Mark item as found by someone else (for non-reporters)
+  Future<void> markItemAsFound(String itemId, String foundNotes) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Please log in to mark an item as found');
+
+    // Get item data to check if user is the reporter
+    final itemDoc = await _firestore.collection('lostFoundItems').doc(itemId).get();
+    if (!itemDoc.exists) throw Exception('Item not found');
+    
+    final itemData = itemDoc.data()!;
+    if (itemData['reporterId'] == user.uid) {
+      throw Exception('You cannot mark your own item as found. Use the edit function instead.');
+    }
+
+    // Get user profile for the finder's name
+    final userProfile = await getUserProfile();
+    final finderName = userProfile?['name'] ?? 'Unknown User';
+    final itemTitle = itemData['title'] ?? 'Unknown Item';
+    final reporterId = itemData['reporterId'] as String;
+
+    // Update the item
+    await _firestore.collection('lostFoundItems').doc(itemId).update({
+      'isFoundByOther': true,
+      'foundBy': user.uid,
+      'foundAt': Timestamp.now(),
+      'foundNotes': foundNotes,
+    });
+
+    // Send notification to the reporter
+    final notificationService = NotificationService();
+    await notificationService.notifyItemFound(
+      reporterId: reporterId,
+      itemTitle: itemTitle,
+      finderName: finderName,
+      foundNotes: foundNotes,
+      itemId: itemId,
+    );
+  }
+
+  // Confirm item as resolved (for the original reporter)
+  Future<void> confirmItemAsResolved(String itemId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Please log in to confirm an item as resolved');
+
+    // Get item data to check if user is the reporter
+    final itemDoc = await _firestore.collection('lostFoundItems').doc(itemId).get();
+    if (!itemDoc.exists) throw Exception('Item not found');
+    
+    final itemData = itemDoc.data()!;
+    if (itemData['reporterId'] != user.uid) {
+      throw Exception('Only the original reporter can confirm the item as resolved');
+    }
+
+    if (!(itemData['isFoundByOther'] ?? false)) {
+      throw Exception('Item must be found by someone else before it can be confirmed as resolved');
+    }
+
+    final itemTitle = itemData['title'] ?? 'Unknown Item';
+    final reporterId = itemData['reporterId'] as String;
+
+    // Update the item
+    await _firestore.collection('lostFoundItems').doc(itemId).update({
+      'isResolved': true,
+      'resolvedBy': user.uid,
+      'resolvedAt': Timestamp.now(),
+    });
+
+    // Send notification to the reporter
+    final notificationService = NotificationService();
+    await notificationService.notifyItemResolved(
+      reporterId: reporterId,
+      itemTitle: itemTitle,
+      itemId: itemId,
+    );
+  }
+
+  // Legacy method for backward compatibility (direct resolution)
   Future<void> resolveLostFoundItem(String itemId, String notes) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Please log in to resolve an item');
