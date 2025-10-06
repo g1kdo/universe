@@ -18,6 +18,660 @@ To create a seamless digital ecosystem that connects students with their campus,
 
 ---
 
+## 📊 System Architecture Diagrams
+
+### 🏗️ Class Diagram
+The following class diagram shows the main entities and their relationships in the Universe app:
+
+```mermaid
+classDiagram
+    %% Core Models
+    class Event {
+        +String id
+        +String title
+        +String description
+        +String location
+        +DateTime date
+        +String time
+        +String category
+        +String organizer
+        +int maxParticipants
+        +List~String~ registeredUsers
+        +String? imageUrl
+        +DateTime createdAt
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class Lab {
+        +String id
+        +String name
+        +String floor
+        +String accommodation
+        +String type
+        +String category
+        +String description
+        +String? imageUrl
+        +bool isAvailable
+        +List~String~ equipment
+        +String? contactPerson
+        +DateTime createdAt
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class News {
+        +String id
+        +String title
+        +String content
+        +String category
+        +String author
+        +DateTime publishedAt
+        +String? imageUrl
+        +List~String~ tags
+        +bool isPublished
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class Club {
+        +String id
+        +String name
+        +String description
+        +String category
+        +String? logoUrl
+        +String presidentId
+        +String presidentName
+        +String? presidentEmail
+        +List~String~ memberIds
+        +List~String~ adminIds
+        +int maxMembers
+        +String meetingSchedule
+        +String meetingLocation
+        +List~String~ tags
+        +DateTime createdAt
+        +DateTime? updatedAt
+        +bool isActive
+        +String? website
+        +String? socialMedia
+        +String? contactInfo
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class LostFoundItem {
+        +String id
+        +String title
+        +String description
+        +String type
+        +String category
+        +String location
+        +String? imageUrl
+        +String reporterId
+        +String reporterName
+        +String? reporterEmail
+        +String? reporterPhone
+        +DateTime reportedAt
+        +bool isResolved
+        +String? resolvedBy
+        +DateTime? resolvedAt
+        +String? notes
+        +String? foundBy
+        +DateTime? foundAt
+        +String? foundNotes
+        +bool isFoundByOther
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class UserSchedule {
+        +String id
+        +String userId
+        +String eventId
+        +String eventTitle
+        +DateTime eventDate
+        +String eventLocation
+        +DateTime createdAt
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    class NotificationModel {
+        +String id
+        +String userId
+        +String title
+        +String message
+        +String type
+        +String? relatedItemId
+        +bool isRead
+        +DateTime createdAt
+        +fromMap()
+        +toMap()
+        +copyWith()
+    }
+
+    %% Services
+    class FirestoreService {
+        -FirebaseFirestore _firestore
+        -FirebaseAuth _auth
+        +getEvents() Stream~List~Event~~
+        +registerForEvent(String eventId) Future~void~
+        +unregisterFromEvent(String eventId) Future~void~
+        +getLabs() Stream~List~Lab~~
+        +getNews() Stream~List~News~~
+        +getUserSchedule() Stream~List~UserSchedule~~
+        +getLostFoundItems() Stream~List~LostFoundItem~~
+        +addLostFoundItem(LostFoundItem item) Future~String~
+        +markItemAsFound(String itemId, String notes) Future~void~
+        +resolveLostFoundItem(String itemId, String notes) Future~void~
+        +getClubs() Stream~List~Club~~
+        +addClub(Club club) Future~String~
+        +joinClub(String clubId) Future~void~
+        +leaveClub(String clubId) Future~void~
+    }
+
+    class AuthService {
+        -FirebaseAuth _auth
+        -GoogleSignIn _googleSignIn
+        -FirebaseFirestore _firestore
+        +currentUser User?
+        +authStateChanges Stream~User?~
+        +signInWithEmailAndPassword(String email, String password) Future~UserCredential?~
+        +createUserWithEmailAndPassword(String email, String password) Future~UserCredential?~
+        +signInWithGoogle() Future~UserCredential?~
+        +signOut() Future~void~
+        +_createOrUpdateUserDocument(User user) Future~void~
+        +_handleAuthException(FirebaseAuthException e) String
+    }
+
+    class StorageService {
+        -FirebaseStorage _storage
+        -ImagePicker _picker
+        +uploadImage(File imageFile, String folder, String fileName) Future~String?~
+        +pickImage(ImageSource source) Future~File?~
+        +generateFileName(String originalName) String
+        +deleteImage(String imageUrl) Future~void~
+    }
+
+    class NotificationService {
+        -FirebaseFirestore _firestore
+        -FirebaseAuth _auth
+        +getNotifications() Stream~List~NotificationModel~~
+        +addNotification(NotificationModel notification) Future~void~
+        +markAsRead(String notificationId) Future~void~
+        +getUnreadCount() Stream~int~
+        +deleteNotification(String notificationId) Future~void~
+    }
+
+    %% UI Screens
+    class HomeScreen {
+        -int _bottomNavIndex
+        -FirestoreService _firestoreService
+        +build() Widget
+        -_buildHomeScreenContent() Widget
+        -_handleSearch(String query) void
+        -_handleCategoryFilter(String category) void
+    }
+
+    class MapsScreen {
+        -GoogleMapController? _mapController
+        -FirestoreService _firestoreService
+        -LatLng _currentLocation
+        -Set~Marker~ _markers
+        -Set~Polyline~ _polylines
+        -bool _isLoading
+        +build() Widget
+        -_initializeMap() Future~void~
+        -_getCurrentLocation() Future~void~
+        -_loadCampusLocations() Future~void~
+    }
+
+    class CommunityScreen {
+        -FirestoreService _firestoreService
+        -StorageService _storageService
+        -NotificationService _notificationService
+        +build() Widget
+        -_buildLostFoundSection() Widget
+        -_buildClubsSection() Widget
+        -_handleImageUpload() Future~void~
+    }
+
+    class ScheduleScreen {
+        -FirestoreService _firestoreService
+        -DateTime _selectedDate
+        +build() Widget
+        -_buildCalendar() Widget
+        -_buildEventsList() Widget
+        -_onDateSelected(DateTime date) void
+    }
+
+    class ProfileScreen {
+        -AuthService _authService
+        -FirestoreService _firestoreService
+        +build() Widget
+        -_buildUserInfo() Widget
+        -_buildSettings() Widget
+        -_handleSignOut() Future~void~
+    }
+
+    %% Relationships
+    FirestoreService --> Event : manages
+    FirestoreService --> Lab : manages
+    FirestoreService --> News : manages
+    FirestoreService --> Club : manages
+    FirestoreService --> LostFoundItem : manages
+    FirestoreService --> UserSchedule : manages
+    FirestoreService --> NotificationModel : manages
+
+    AuthService --> FirestoreService : authenticates for
+    StorageService --> LostFoundItem : stores images for
+    StorageService --> Club : stores logos for
+    NotificationService --> NotificationModel : manages
+
+    HomeScreen --> FirestoreService : uses
+    MapsScreen --> FirestoreService : uses
+    CommunityScreen --> FirestoreService : uses
+    CommunityScreen --> StorageService : uses
+    CommunityScreen --> NotificationService : uses
+    ScheduleScreen --> FirestoreService : uses
+    ProfileScreen --> AuthService : uses
+    ProfileScreen --> FirestoreService : uses
+
+    UserSchedule --> Event : references
+    LostFoundItem --> NotificationModel : triggers
+    Club --> NotificationModel : triggers
+```
+
+### 👥 Use Case Diagram
+The following use case diagram shows the main user interactions with the Universe app:
+
+```mermaid
+graph TB
+    %% Actors
+    Student[👨‍🎓 Student]
+    Admin[👨‍💼 Admin]
+    Organizer[👨‍🏫 Event Organizer]
+    Guest[👤 Guest User]
+
+    %% Use Cases - Authentication
+    subgraph Auth["🔐 Authentication"]
+        UC1[Sign In/Up]
+        UC2[Google Sign In]
+        UC3[Sign Out]
+        UC4[Guest Mode]
+    end
+
+    %% Use Cases - Navigation
+    subgraph Nav["🗺️ Campus Navigation"]
+        UC5[View Campus Map]
+        UC6[Get Directions]
+        UC7[Search Locations]
+        UC8[View Lab Details]
+        UC9[Check Lab Availability]
+    end
+
+    %% Use Cases - Events
+    subgraph Events["📅 Event Management"]
+        UC10[View Events]
+        UC11[Register for Event]
+        UC12[View Personal Schedule]
+        UC13[Create Event]
+        UC14[Manage Event Registration]
+    end
+
+    %% Use Cases - Community
+    subgraph Community["🤝 Community Features"]
+        UC15[Report Lost Item]
+        UC16[Mark Item as Found]
+        UC17[Resolve Lost Item]
+        UC18[Join Club]
+        UC19[Create Club]
+        UC20[Manage Club Members]
+        UC21[Upload Images]
+    end
+
+    %% Use Cases - News & Updates
+    subgraph News["📰 News & Updates"]
+        UC22[View Campus News]
+        UC23[Filter News by Category]
+        UC24[Create News Article]
+        UC25[Manage News Content]
+    end
+
+    %% Use Cases - Notifications
+    subgraph Notifications["🔔 Notifications"]
+        UC26[View Notifications]
+        UC27[Mark as Read]
+        UC28[Delete Notifications]
+        UC29[Receive Push Notifications]
+    end
+
+    %% Use Cases - Profile & Settings
+    subgraph Profile["👤 Profile & Settings"]
+        UC30[View Profile]
+        UC31[Update Profile]
+        UC32[Change Theme]
+        UC33[Manage Preferences]
+    end
+
+    %% Use Cases - VR Tour
+    subgraph VR["🎮 Virtual Reality"]
+        UC34[Start VR Tour]
+        UC35[Navigate VR Campus]
+        UC36[View Location Info]
+    end
+
+    %% Student Relationships
+    Student --> UC1
+    Student --> UC2
+    Student --> UC3
+    Student --> UC4
+    Student --> UC5
+    Student --> UC6
+    Student --> UC7
+    Student --> UC8
+    Student --> UC9
+    Student --> UC10
+    Student --> UC11
+    Student --> UC12
+    Student --> UC15
+    Student --> UC16
+    Student --> UC17
+    Student --> UC18
+    Student --> UC21
+    Student --> UC22
+    Student --> UC23
+    Student --> UC26
+    Student --> UC27
+    Student --> UC28
+    Student --> UC29
+    Student --> UC30
+    Student --> UC31
+    Student --> UC32
+    Student --> UC33
+    Student --> UC34
+    Student --> UC35
+    Student --> UC36
+
+    %% Admin Relationships
+    Admin --> UC1
+    Admin --> UC2
+    Admin --> UC3
+    Admin --> UC5
+    Admin --> UC6
+    Admin --> UC7
+    Admin --> UC8
+    Admin --> UC9
+    Admin --> UC10
+    Admin --> UC12
+    Admin --> UC13
+    Admin --> UC14
+    Admin --> UC15
+    Admin --> UC16
+    Admin --> UC17
+    Admin --> UC18
+    Admin --> UC19
+    Admin --> UC20
+    Admin --> UC21
+    Admin --> UC22
+    Admin --> UC23
+    Admin --> UC24
+    Admin --> UC25
+    Admin --> UC26
+    Admin --> UC27
+    Admin --> UC28
+    Admin --> UC29
+    Admin --> UC30
+    Admin --> UC31
+    Admin --> UC32
+    Admin --> UC33
+    Admin --> UC34
+    Admin --> UC35
+    Admin --> UC36
+
+    %% Organizer Relationships
+    Organizer --> UC1
+    Organizer --> UC2
+    Organizer --> UC3
+    Organizer --> UC5
+    Organizer --> UC6
+    Organizer --> UC7
+    Organizer --> UC8
+    Organizer --> UC9
+    Organizer --> UC10
+    Organizer --> UC12
+    Organizer --> UC13
+    Organizer --> UC14
+    Organizer --> UC15
+    Organizer --> UC16
+    Organizer --> UC17
+    Organizer --> UC18
+    Organizer --> UC19
+    Organizer --> UC20
+    Organizer --> UC21
+    Organizer --> UC22
+    Organizer --> UC23
+    Organizer --> UC26
+    Organizer --> UC27
+    Organizer --> UC28
+    Organizer --> UC29
+    Organizer --> UC30
+    Organizer --> UC31
+    Organizer --> UC32
+    Organizer --> UC33
+    Organizer --> UC34
+    Organizer --> UC35
+    Organizer --> UC36
+
+    %% Guest Relationships
+    Guest --> UC4
+    Guest --> UC5
+    Guest --> UC7
+    Guest --> UC8
+    Guest --> UC9
+    Guest --> UC10
+    Guest --> UC22
+    Guest --> UC23
+    Guest --> UC34
+    Guest --> UC35
+    Guest --> UC36
+```
+
+### 🔄 Activity Diagrams
+
+#### Event Registration Activity Flow
+```mermaid
+flowchart TD
+    Start([User opens Events]) --> ViewEvents[View Available Events]
+    ViewEvents --> SelectEvent{Select Event?}
+    SelectEvent -->|No| ViewEvents
+    SelectEvent -->|Yes| CheckAuth{User Authenticated?}
+    CheckAuth -->|No| ShowLogin[Show Login Screen]
+    ShowLogin --> Login[User Logs In]
+    Login --> CheckAuth
+    CheckAuth -->|Yes| CheckCapacity{Event Has Capacity?}
+    CheckCapacity -->|No| ShowFull[Show Event Full Message]
+    ShowFull --> ViewEvents
+    CheckCapacity -->|Yes| CheckRegistered{Already Registered?}
+    CheckRegistered -->|Yes| ShowRegistered[Show Already Registered Message]
+    ShowRegistered --> ViewEvents
+    CheckRegistered -->|No| Register[Register for Event]
+    Register --> UpdateEvent[Update Event Registration Count]
+    UpdateEvent --> CreateSchedule[Create User Schedule Entry]
+    CreateSchedule --> SendNotification[Send Registration Confirmation]
+    SendNotification --> ShowSuccess[Show Registration Success]
+    ShowSuccess --> ViewEvents
+```
+
+#### Lost & Found Workflow Activity Flow
+```mermaid
+flowchart TD
+    Start([User opens Community]) --> ChooseAction{Choose Action}
+    ChooseAction -->|Report Lost| ReportLost[Report Lost Item]
+    ChooseAction -->|View Items| ViewItems[View Lost & Found Items]
+    ChooseAction -->|Mark Found| MarkFound[Mark Item as Found]
+    
+    ReportLost --> FillForm[Fill Item Details Form]
+    FillForm --> UploadImage{Upload Image?}
+    UploadImage -->|Yes| SelectImage[Select/Capture Image]
+    UploadImage -->|No| SubmitReport
+    SelectImage --> UploadToStorage[Upload to Firebase Storage]
+    UploadToStorage --> SubmitReport[Submit Report]
+    SubmitReport --> SaveToFirestore[Save to Firestore]
+    SaveToFirestore --> NotifyCommunity[Notify Community]
+    NotifyCommunity --> ShowSuccess[Show Report Success]
+    ShowSuccess --> ViewItems
+    
+    ViewItems --> FilterItems[Filter Items by Category/Status]
+    FilterItems --> DisplayItems[Display Filtered Items]
+    DisplayItems --> ItemAction{Item Action?}
+    ItemAction -->|View Details| ShowDetails[Show Item Details]
+    ItemAction -->|Mark Found| MarkFound
+    ItemAction -->|Back| ViewItems
+    
+    MarkFound --> SelectItem[Select Item to Mark as Found]
+    SelectItem --> AddNotes[Add Finding Notes]
+    AddNotes --> UpdateStatus[Update Item Status to 'Found by Other']
+    UpdateStatus --> NotifyReporter[Notify Original Reporter]
+    NotifyReporter --> ShowFoundSuccess[Show Mark as Found Success]
+    ShowFoundSuccess --> ViewItems
+    
+    ShowDetails --> ResolveItem{Resolve Item?}
+    ResolveItem -->|Yes| ConfirmResolution[Confirm Resolution]
+    ResolveItem -->|No| ViewItems
+    ConfirmResolution --> UpdateResolved[Update Status to 'Resolved']
+    UpdateResolved --> NotifyFinder[Notify Finder]
+    NotifyFinder --> ShowResolvedSuccess[Show Resolution Success]
+    ShowResolvedSuccess --> ViewItems
+```
+
+#### Campus Navigation Activity Flow
+```mermaid
+flowchart TD
+    Start([User opens Maps]) --> CheckLocation{Location Permission?}
+    CheckLocation -->|No| RequestPermission[Request Location Permission]
+    RequestPermission --> CheckLocation
+    CheckLocation -->|Yes| GetCurrentLocation[Get Current Location]
+    GetCurrentLocation --> LoadMap[Load Google Maps]
+    LoadMap --> LoadCampusData[Load Campus Locations from Firestore]
+    LoadCampusData --> DisplayMarkers[Display Campus Markers]
+    DisplayMarkers --> UserAction{User Action?}
+    
+    UserAction -->|Search Location| SearchLocation[Search for Location]
+    UserAction -->|Tap Marker| ShowMarkerInfo[Show Marker Information]
+    UserAction -->|Get Directions| GetDirections[Get Directions to Location]
+    UserAction -->|View Lab Details| ShowLabDetails[Show Lab Details]
+    
+    SearchLocation --> FilterResults[Filter Search Results]
+    FilterResults --> DisplayResults[Display Search Results]
+    DisplayResults --> SelectResult{Select Result?}
+    SelectResult -->|Yes| ShowMarkerInfo
+    SelectResult -->|No| UserAction
+    
+    ShowMarkerInfo --> MarkerAction{Marker Action?}
+    MarkerAction -->|Get Directions| GetDirections
+    MarkerAction -->|View Details| ShowLabDetails
+    MarkerAction -->|Close| UserAction
+    
+    GetDirections --> CalculateRoute[Calculate Route]
+    CalculateRoute --> DisplayRoute[Display Route on Map]
+    DisplayRoute --> UserAction
+    
+    ShowLabDetails --> LabInfo[Show Lab Information]
+    LabInfo --> LabAction{Lab Action?}
+    LabAction -->|Get Directions| GetDirections
+    LabAction -->|Contact| ShowContact[Show Contact Information]
+    LabAction -->|Close| UserAction
+    ShowContact --> UserAction
+```
+
+### 🏗️ Deployment Diagram
+The following deployment diagram shows the system architecture and deployment structure:
+
+```mermaid
+graph TB
+    %% Client Devices
+    subgraph "📱 Client Devices"
+        Android[🤖 Android Device<br/>Flutter App<br/>Universe v1.1]
+        iOS[🍎 iOS Device<br/>Flutter App<br/>Universe v1.1]
+    end
+
+    %% Frontend Layer
+    subgraph "🌐 Frontend Layer"
+        FlutterApp[📱 Flutter Application<br/>- Dart/Flutter Framework<br/>- Material Design 3<br/>- State Management (Riverpod)<br/>- Local Storage (SharedPreferences)]
+    end
+
+    %% Authentication Layer
+    subgraph "🔐 Authentication Services"
+        FirebaseAuth[🔑 Firebase Authentication<br/>- Google OAuth<br/>- Email/Password Auth<br/>- User Management<br/>- Session Handling]
+    end
+
+    %% Backend Services
+    subgraph "☁️ Firebase Backend Services"
+        Firestore[(🗄️ Cloud Firestore<br/>- NoSQL Database<br/>- Real-time Sync<br/>- Collections: events, labs, news,<br/>  clubs, lostFoundItems,<br/>  userSchedules, notifications)]
+        
+        FirebaseStorage[(📁 Firebase Storage<br/>- Image Storage<br/>- File Management<br/>- Secure Access<br/>- CDN Distribution)]
+        
+        CloudMessaging[📨 Firebase Cloud Messaging<br/>- Push Notifications<br/>- Real-time Alerts<br/>- Background Sync]
+    end
+
+    %% External Services
+    subgraph "🌍 External Services"
+        GoogleMaps[🗺️ Google Maps Platform<br/>- Maps API<br/>- Directions API<br/>- Geocoding API<br/>- Places API]
+        
+        GoogleSignIn[🔐 Google Sign-In<br/>- OAuth 2.0<br/>- User Authentication<br/>- Profile Data]
+    end
+
+    %% Device Services
+    subgraph "📱 Device Services"
+        LocationService[📍 Location Services<br/>- GPS Tracking<br/>- Permission Handling<br/>- Geolocator Package]
+        
+        CameraService[📸 Camera Services<br/>- Image Capture<br/>- Gallery Access<br/>- Image Picker Package]
+        
+        NotificationService[🔔 Local Notifications<br/>- In-app Notifications<br/>- Badge Management<br/>- User Alerts]
+    end
+
+    %% Network Layer
+    subgraph "🌐 Network Layer"
+        HTTPS[🔒 HTTPS/TLS<br/>- Encrypted Communication<br/>- Secure Data Transfer<br/>- API Authentication]
+    end
+
+    %% Connections
+    Android --> FlutterApp
+    iOS --> FlutterApp
+    
+    FlutterApp --> HTTPS
+    HTTPS --> FirebaseAuth
+    HTTPS --> Firestore
+    HTTPS --> FirebaseStorage
+    HTTPS --> CloudMessaging
+    HTTPS --> GoogleMaps
+    HTTPS --> GoogleSignIn
+    
+    FlutterApp --> LocationService
+    FlutterApp --> CameraService
+    FlutterApp --> NotificationService
+    
+    FirebaseAuth --> Firestore
+    CloudMessaging --> NotificationService
+    
+    %% Data Flow Annotations
+    FlutterApp -.->|"Real-time Data Sync"| Firestore
+    FlutterApp -.->|"Image Upload/Download"| FirebaseStorage
+    FlutterApp -.->|"Push Notifications"| CloudMessaging
+    FlutterApp -.->|"Map Data & Directions"| GoogleMaps
+    FlutterApp -.->|"User Authentication"| FirebaseAuth
+    FlutterApp -.->|"Google Sign-In"| GoogleSignIn
+```
+
+---
+
 ## 📱 **Download & Install Universe**
 
 ### 🚀 **Ready-to-Use APK**
