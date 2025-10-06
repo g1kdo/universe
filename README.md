@@ -20,6 +20,11 @@ To create a seamless digital ecosystem that connects students with their campus,
 
 ## 📊 System Architecture Diagrams
 
+⚠️ Note on Diagrams (Mermaid)
+The system architecture diagrams below are generated using Mermaid (Diagrams as Code).
+
+If any of the diagrams—including the Class, Use Case, Activity, or Deployment diagrams—fail to render and display an "Unable to render rich display" message, please try refreshing the page once or twice. GitHub's rendering engine sometimes requires a quick refresh to fully process the complex Mermaid syntax.
+
 ### 🏗️ Class Diagram
 The following class diagram shows the main entities and their relationships in the Universe app:
 
