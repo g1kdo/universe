@@ -598,48 +598,48 @@ The following deployment diagram shows the system architecture and deployment st
 graph TB
     %% Client Devices
     subgraph "📱 Client Devices"
-        Android[🤖 Android Device<br/>Flutter App<br/>Universe v1.1]
-        iOS[🍎 iOS Device<br/>Flutter App<br/>Universe v1.1]
+        Android["🤖 Android Device<br/>Flutter App<br/>Universe v1.1"]
+        iOS["🍎 iOS Device<br/>Flutter App<br/>Universe v1.1"]
     end
 
     %% Frontend Layer
     subgraph "🌐 Frontend Layer"
-        FlutterApp[📱 Flutter Application<br/>- Dart/Flutter Framework<br/>- Material Design 3<br/>- State Management (Riverpod)<br/>- Local Storage (SharedPreferences)]
+        FlutterApp["📱 Flutter Application<br/>- Dart/Flutter Framework<br/>- Material Design 3<br/>- State Management (Riverpod)<br/>- Local Storage (SharedPreferences)"]
     end
 
     %% Authentication Layer
     subgraph "🔐 Authentication Services"
-        FirebaseAuth[🔑 Firebase Authentication<br/>- Google OAuth<br/>- Email/Password Auth<br/>- User Management<br/>- Session Handling]
+        FirebaseAuth["🔑 Firebase Authentication<br/>- Google OAuth<br/>- Email/Password Auth<br/>- User Management<br/>- Session Handling"]
     end
 
     %% Backend Services
     subgraph "☁️ Firebase Backend Services"
-        Firestore[(🗄️ Cloud Firestore<br/>- NoSQL Database<br/>- Real-time Sync<br/>- Collections: events, labs, news,<br/>  clubs, lostFoundItems,<br/>  userSchedules, notifications)]
+        Firestore[("🗄️ Cloud Firestore<br/>- NoSQL Database<br/>- Real-time Sync<br/>- Collections: events, labs, news,<br/>  clubs, lostFoundItems,<br/>  userSchedules, notifications")]
         
-        FirebaseStorage[(📁 Firebase Storage<br/>- Image Storage<br/>- File Management<br/>- Secure Access<br/>- CDN Distribution)]
+        FirebaseStorage[("📁 Firebase Storage<br/>- Image Storage<br/>- File Management<br/>- Secure Access<br/>- CDN Distribution")]
         
-        CloudMessaging[📨 Firebase Cloud Messaging<br/>- Push Notifications<br/>- Real-time Alerts<br/>- Background Sync]
+        CloudMessaging["📨 Firebase Cloud Messaging<br/>- Push Notifications<br/>- Real-time Alerts<br/>- Background Sync"]
     end
 
     %% External Services
     subgraph "🌍 External Services"
-        GoogleMaps[🗺️ Google Maps Platform<br/>- Maps API<br/>- Directions API<br/>- Geocoding API<br/>- Places API]
+        GoogleMaps["🗺️ Google Maps Platform<br/>- Maps API<br/>- Directions API<br/>- Geocoding API<br/>- Places API"]
         
-        GoogleSignIn[🔐 Google Sign-In<br/>- OAuth 2.0<br/>- User Authentication<br/>- Profile Data]
+        GoogleSignIn["🔐 Google Sign-In<br/>- OAuth 2.0<br/>- User Authentication<br/>- Profile Data"]
     end
 
     %% Device Services
     subgraph "📱 Device Services"
-        LocationService[📍 Location Services<br/>- GPS Tracking<br/>- Permission Handling<br/>- Geolocator Package]
+        LocationService["📍 Location Services<br/>- GPS Tracking<br/>- Permission Handling<br/>- Geolocator Package"]
         
-        CameraService[📸 Camera Services<br/>- Image Capture<br/>- Gallery Access<br/>- Image Picker Package]
+        CameraService["📸 Camera Services<br/>- Image Capture<br/>- Gallery Access<br/>- Image Picker Package"]
         
-        NotificationService[🔔 Local Notifications<br/>- In-app Notifications<br/>- Badge Management<br/>- User Alerts]
+        NotificationService["🔔 Local Notifications<br/>- In-app Notifications<br/>- Badge Management<br/>- User Alerts"]
     end
 
     %% Network Layer
     subgraph "🌐 Network Layer"
-        HTTPS[🔒 HTTPS/TLS<br/>- Encrypted Communication<br/>- Secure Data Transfer<br/>- API Authentication]
+        HTTPS["🔒 HTTPS/TLS<br/>- Encrypted Communication<br/>- Secure Data Transfer<br/>- API Authentication"]
     end
 
     %% Connections
