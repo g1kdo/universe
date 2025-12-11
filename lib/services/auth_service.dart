@@ -1,10 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'profile',
+    ],
+  );
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Current user getter
@@ -45,10 +51,22 @@ class AuthService {
   // Google Sign In
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      // Sign out first to ensure a fresh sign-in
+      await _googleSignIn.signOut();
+      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return null;
+      }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      // Check if we have the required tokens
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw Exception('Failed to obtain authentication tokens from Google');
+      }
+      
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -60,7 +78,16 @@ class AuthService {
       await _createOrUpdateUserDocument(userCredential.user!);
       
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw Exception('Google sign in failed: ${e.message ?? e.code}');
     } catch (e) {
+      // Handle PlatformException specifically for better error messages
+      if (e.toString().contains('ApiException: 10')) {
+        throw Exception('Google sign in configuration error. Please ensure:\n'
+            '1. SHA-1 fingerprint is added to Firebase Console\n'
+            '2. Google Sign-In is enabled in Firebase Console\n'
+            '3. OAuth client is properly configured');
+      }
       throw Exception('Google sign in failed: $e');
     }
   }
@@ -110,7 +137,8 @@ class AuthService {
         });
       }
     } catch (e) {
-      print('Error creating/updating user document: $e');
+      // Use debugPrint instead of print for better Flutter debugging
+      debugPrint('Error creating/updating user document: $e');
       // Don't throw error here to avoid breaking the auth flow
     }
   }

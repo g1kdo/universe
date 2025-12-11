@@ -257,14 +257,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 30),
 
               // --- User Info Section ---
-              StreamBuilder<Map<String, dynamic>?>(
-                stream: Stream.fromFuture(_firestoreService.getUserProfile()),
+              FutureBuilder<Map<String, dynamic>?>(
+                future: _firestoreService.getUserProfile(),
                 builder: (context, snapshot) {
                   final userProfile = snapshot.data;
                   final isAuthenticated = _auth.currentUser != null;
                   
                   if (!isAuthenticated) {
                     return _buildGuestUserInfo();
+                  }
+                  
+                  // Show loading indicator while fetching profile
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
                   }
                   
                   final userName = userProfile?['name'] ?? _auth.currentUser?.displayName ?? 'User';
@@ -276,9 +281,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       CircleAvatar(
                         radius: 40,
                         backgroundImage: profileImageUrl != null ? NetworkImage(profileImageUrl) : null,
-                        onBackgroundImageError: (exception, stackTrace) {
-                          // Handle image loading error
-                        },
+                        onBackgroundImageError: profileImageUrl != null ? (exception, stackTrace) {
+                          // Handle image loading error - image failed to load
+                        } : null,
                         child: profileImageUrl == null 
                           ? const Icon(Icons.person, size: 40, color: Colors.grey)
                           : null,
