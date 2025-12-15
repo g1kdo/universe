@@ -750,9 +750,10 @@ flutter build apk --release
 #### **📋 Current Status & Next Steps**
 
 **✅ What's Ready:**
-- APK successfully built (52.97MB)
-- All features working (Image Upload, Lost & Found, Club Management)
+- APK successfully built (53.6MB for v1.2.0)
+- All features working (Image Upload, Lost & Found, Club Management, Account Settings)
 - Repository contains all source code
+- Latest version: v1.2.0 with Account Settings and Profile Picture Management
 
 **⚠️ What's Missing:**
 - APK not publicly available (build files are gitignored)
@@ -763,21 +764,66 @@ flutter build apk --release
 1. **Create a GitHub Release**:
    ```bash
    # Tag the current version (✅ DONE)
-   git tag -a v1.1 -m "Universe v1.1 with Notifications & Enhanced Workflow"
-   git push origin v1.1
+   git tag -a v1.2.0 -m "Universe v1.2.0 with Account Settings & Profile Picture Management"
+   git push origin v1.2.0
    ```
 
 2. **Upload APK to Release**:
    - Go to [GitHub Releases](https://github.com/g1kdo/universe/releases)
    - Click "Create a new release"
-   - Select the `v1.1` tag
+   - Select the `v1.2.0` tag
    - Upload `build/app/outputs/flutter-apk/app-release.apk`
    - Publish the release
 
 3. **Result**:
-   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v1.1/app-release.apk`
+   - Direct download link: `https://github.com/g1kdo/universe/releases/download/v1.2.0/app-release.apk`
    - QR code will work for public downloads
    - Users can download without building
+
+---
+
+## 📝 Version History
+
+### **v1.2.0** (Latest)
+**Account Settings & Profile Picture Management**
+
+**New Features:**
+- ✨ **Account Settings Screen**: Comprehensive account management interface
+  - Edit profile information (name, location)
+  - Profile picture upload, update, and removal
+  - Email settings (change email for email/password users)
+  - Password management (change password for email/password users)
+- 🔐 **Secure Re-authentication**: All sensitive operations require password verification
+- 📸 **Profile Picture Management**: Upload profile pictures with Firebase Storage integration
+- 🎨 **Smart Access Control**: Password features only available for email/password accounts
+- 🐛 **Bug Fixes**: Fixed schedule screen date alignment issue
+
+**Technical Improvements:**
+- Added `uploadProfilePicture()` method to StorageService
+- Enhanced AuthService with `updateEmail()`, `updatePassword()`, and `reauthenticateWithPassword()`
+- Added user-specific Firebase Storage security rules for profile pictures
+- Improved error handling for account operations
+
+### **v1.1.0**
+**Notifications & Enhanced Workflow**
+
+**New Features:**
+- Smart notification system with real-time updates
+- Enhanced Lost & Found workflow with multi-user resolution
+- Unread notification badges
+- Notification management interface
+
+### **v1.0.0**
+**Initial Release**
+
+**Features:**
+- Campus navigation with Google Maps
+- Event management and registration
+- Lost & Found system
+- Club management
+- News feed
+- Lab information system
+- Virtual Reality tour
 
 ---
 
@@ -839,13 +885,22 @@ flutter build apk --release
 |---------|-------------|------------|
 | **Theme Management** | Light/Dark/System theme switching | SharedPreferences, Riverpod |
 | **User Preferences** | Persistent app settings and configurations | Local Storage, State Management |
+| **Account Settings** | Edit profile, change email, and update password | Firebase Auth, Firestore |
+| **Profile Picture Management** | Upload, update, and remove profile pictures with Firebase Storage | Firebase Storage, Image Picker |
+| **Email Settings** | Change email address (email/password users only) | Firebase Auth, Re-authentication |
+| **Password Management** | Change password with secure re-authentication (email/password users only) | Firebase Auth, Re-authentication |
 
 ### 👤 **Advanced User Management**
 | Feature | Description | Tech Stack |
 |---------|-------------|------------|
 | **Google Authentication** | Secure login with Google OAuth | Firebase Auth, Google Sign-In |
+| **Email/Password Authentication** | Traditional email and password login | Firebase Auth |
 | **Guest Mode** | Limited access for non-registered users | Conditional UI, Feature Gating |
 | **Profile Management** | Comprehensive user profiles with statistics | Firestore, Custom Profile Models |
+| **Account Settings** | Edit profile information, location, and profile picture | Firebase Auth, Firestore, Firebase Storage |
+| **Email Management** | Update email address with secure re-authentication | Firebase Auth, Re-authentication |
+| **Password Management** | Change password with secure re-authentication (email/password users only) | Firebase Auth, Re-authentication |
+| **Profile Picture Upload** | Upload, update, and manage profile pictures with Firebase Storage | Firebase Storage, Image Picker |
 | **Role-based Access** | Admin, organizer, and student roles | Custom Claims, Permission System |
 | **Dark Mode Support** | Persistent theme switching with system integration | SharedPreferences, Riverpod State Management |
 
@@ -1241,7 +1296,13 @@ For easy sharing, you can:
 - **Activity Tracking**: Events attended, clubs joined, items reported
 - **Achievement System**: Unlock achievements based on participation
 - **Privacy Controls**: Manage your data and privacy settings
-- **Account Management**: Secure login and profile updates
+- **Account Settings**: Full account management with secure operations
+  - **Edit Profile**: Update name, location, and other profile information
+  - **Profile Picture Management**: Upload, update, or remove profile pictures
+  - **Email Settings**: Change email address (email/password users only)
+  - **Password Management**: Change password with secure re-authentication (email/password users only)
+- **Secure Operations**: All sensitive operations require re-authentication
+- **Smart Access Control**: Password management only available for email/password accounts
 - **Notification Bell**: Unread notification count with badge indicator
 
 ### 📸 **Image Upload Features**
@@ -1377,6 +1438,13 @@ Universe now includes a comprehensive image upload system that makes community i
 - **Multiple Format Support**: JPEG, PNG, and other common formats
 - **Storage Management**: Efficient cloud storage with automatic cleanup
 
+#### **👤 Profile Picture Management**
+- **Profile Picture Upload**: Upload custom profile pictures from camera or gallery
+- **Picture Management**: Update, replace, or remove profile pictures easily
+- **Automatic Synchronization**: Profile pictures synced between Firebase Auth and Firestore
+- **Secure Storage**: Profile pictures stored securely in Firebase Storage with user-specific access rules
+- **Image Cleanup**: Automatic deletion of old profile pictures when replaced
+
 #### **🔧 Technical Implementation**
 ```dart
 // Image Upload Service
@@ -1390,22 +1458,52 @@ class StorageService {
     // Upload club logo to Firebase Storage
     // Return download URL for Firestore
   }
+  
+  Future<String?> uploadProfilePicture(File imageFile, String userId) async {
+    // Upload profile picture to Firebase Storage
+    // File naming: {userId}_{timestamp}.{extension}
+    // Return download URL for Firestore and Firebase Auth
+  }
+}
+
+// Account Settings Service
+class AuthService {
+  bool isEmailPasswordUser() {
+    // Check if user signed in with email/password
+  }
+  
+  Future<void> updateEmail(String newEmail, String password) async {
+    // Re-authenticate and update email
+    // Updates both Firebase Auth and Firestore
+  }
+  
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    // Re-authenticate and update password
+  }
+  
+  Future<void> reauthenticateWithPassword(String password) async {
+    // Re-authenticate user for sensitive operations
+  }
 }
 ```
 
 #### **✨ Key Benefits**
 - **Visual Identification**: Photos help identify lost items more easily
 - **Professional Appearance**: Club logos enhance organization branding
-- **User-Friendly**: Simple tap-to-upload interface
-- **Secure Storage**: All images stored securely in Firebase Storage
+- **Personalization**: Profile pictures help users personalize their accounts
+- **User-Friendly**: Simple tap-to-upload interface with camera and gallery options
+- **Secure Storage**: All images stored securely in Firebase Storage with access control
 - **Fast Performance**: Optimized image loading and caching
 - **Offline Support**: Images cached for offline viewing
+- **Account Security**: Secure account management with re-authentication for sensitive operations
 
 #### **📋 Setup Requirements**
 1. **Firebase Storage**: Enable Firebase Storage in your Firebase project
-2. **Storage Rules**: Configure appropriate security rules
+2. **Storage Rules**: Configure appropriate security rules (including profile picture access rules)
 3. **Permissions**: Camera and storage permissions for image capture
 4. **Storage Bucket**: Configure Firebase Storage bucket settings
+5. **Firebase Auth**: Ensure email/password authentication is enabled for password management features
+6. **Security Rules**: Profile pictures should use user-specific access rules for security
 
 #### **🎯 User Experience**
 - **One-Tap Upload**: Simple interface for image selection
@@ -1452,6 +1550,10 @@ class StorageService {
 
 ### 🔐 **Authentication & Authorization**
 - **Google OAuth**: Secure authentication with Google accounts
+- **Email/Password Authentication**: Traditional authentication method
+- **Account Management**: Secure account settings with re-authentication
+- **Profile Picture Security**: User-specific access rules for profile pictures
+- **Email & Password Updates**: Secure email and password changes with re-authentication
 - **Role-based Access**: Admin, organizer, and student permissions
 - **Session Management**: Secure session handling and timeout
 - **Multi-factor Authentication**: Optional 2FA for enhanced security
