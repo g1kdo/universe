@@ -172,7 +172,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: List.generate(7, (index) {
-                        DateTime day = _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1 - index));
+                        // Calculate the Sunday of the week, then add index days
+                        // weekday: 1=Monday, 2=Tuesday, ..., 7=Sunday
+                        // To get to Sunday: if weekday is 7, subtract 0; if 1, subtract 1; etc.
+                        int daysToSunday = _selectedDate.weekday % 7; // 1->1, 2->2, ..., 6->6, 7->0
+                        DateTime sundayOfWeek = _selectedDate.subtract(Duration(days: daysToSunday));
+                        DateTime day = sundayOfWeek.add(Duration(days: index));
                         bool isSelected = day.day == _selectedDate.day && day.month == _selectedDate.month;
                         return GestureDetector(
                           onTap: () {

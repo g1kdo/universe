@@ -1,9 +1,15 @@
 // lib/ui/screens/settings_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universe/services/firestore_service.dart';
+import 'package:universe/services/auth_service.dart';
+import 'package:universe/services/storage_service.dart';
 import 'package:universe/providers/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -14,6 +20,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Settings state
@@ -150,14 +157,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   _showEmailSettingsDialog();
                 },
               ),
-              _buildListTile(
-                icon: Icons.security,
-                title: 'Change Password',
-                subtitle: 'Update your account password',
-                onTap: () {
-                  _showChangePasswordDialog();
-                },
-              ),
+              if (_authService.isEmailPasswordUser())
+                _buildListTile(
+                  icon: Icons.security,
+                  title: 'Change Password',
+                  subtitle: 'Update your account password',
+                  onTap: () {
+                    _showChangePasswordDialog();
+                  },
+                ),
             ]),
 
             const SizedBox(height: 24),
@@ -360,50 +368,567 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showProfileEditDialog() {
-    showDialog(
+  void _showProfileEditDialog() async {
+    final userProfile = await _firestoreService.getUserProfile();
+    final currentUser = _auth.currentUser;
+    
+    final nameController = TextEditingController(
+      text: userProfile?['name'] ?? currentUser?.displayName ?? '',
+    );
+    final locationController = TextEditingController(
+      text: userProfile?['location'] ?? 'Campus',
+    );
+    
+    // Get current profile image URL
+    String? currentImageUrl = userProfile?['profileImageUrl'] ?? currentUser?.photoURL;
+    
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
+    File? selectedImageFile;
+    String? imageUrl = currentImageUrl;
+    bool isUploadingImage = false;
+    
+    await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Profile'),
-        content: const Text('Profile editing feature will be available soon.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit Profile'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Profile Picture Section
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          backgroundImage: selectedImageFile != null
+                              ? FileImage(selectedImageFile!)
+                              : imageUrl != null
+                                  ? NetworkImage(imageUrl!)
+                                  : null,
+                          child: (selectedImageFile == null && imageUrl == null)
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                )
+                              : null,
+                        ),
+                        if (isUploadingImage)
+                          const Positioned.fill(
+                            child: CircularProgressIndicator(),
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            child: IconButton(
+                              icon: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+                              onPressed: isLoading || isUploadingImage
+                                  ? null
+                                  : () async {
+                                      // Show image source selection
+                                      final ImageSource? source = await showModalBottomSheet<ImageSource>(
+                                        context: context,
+                                        builder: (BuildContext bottomSheetContext) {
+                                          return SafeArea(
+                                            child: Wrap(
+                                              children: [
+                                                ListTile(
+                                                  leading: const Icon(Icons.camera_alt),
+                                                  title: const Text('Camera'),
+                                                  onTap: () => Navigator.pop(bottomSheetContext, ImageSource.camera),
+                                                ),
+                                                ListTile(
+                                                  leading: const Icon(Icons.photo_library),
+                                                  title: const Text('Gallery'),
+                                                  onTap: () => Navigator.pop(bottomSheetContext, ImageSource.gallery),
+                                                ),
+                                                if (imageUrl != null || selectedImageFile != null)
+                                                  ListTile(
+                                                    leading: const Icon(Icons.delete, color: Colors.red),
+                                                    title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                                                    onTap: () {
+                                                      Navigator.pop(bottomSheetContext);
+                                                      setDialogState(() {
+                                                        selectedImageFile = null;
+                                                        imageUrl = null;
+                                                      });
+                                                    },
+                                                  ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                      
+                                      if (source != null) {
+                                        setDialogState(() {
+                                          isUploadingImage = true;
+                                        });
+                                        
+                                        final File? pickedImage = await StorageService.pickImage(source: source);
+                                        
+                                        if (pickedImage != null) {
+                                          setDialogState(() {
+                                            selectedImageFile = pickedImage;
+                                            isUploadingImage = false;
+                                          });
+                                        } else {
+                                          setDialogState(() {
+                                            isUploadingImage = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: locationController,
+                    decoration: const InputDecoration(
+                      labelText: 'Location',
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g., Campus, Building A',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your location';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading || isUploadingImage ? null : () async {
+                if (formKey.currentState!.validate()) {
+                  setDialogState(() {
+                    isLoading = true;
+                  });
+                  
+                  try {
+                    String? newImageUrl = imageUrl;
+                    
+                    // Upload new profile picture if selected
+                    if (selectedImageFile != null && currentUser != null) {
+                      // Delete old image from storage if it exists and is not from Google
+                      if (currentImageUrl != null && 
+                          !currentImageUrl.contains('googleusercontent.com') &&
+                          !currentImageUrl.contains('googleapis.com')) {
+                        try {
+                          await StorageService.deleteImage(currentImageUrl!);
+                        } catch (e) {
+                          // Ignore deletion errors
+                          debugPrint('Error deleting old profile image: $e');
+                        }
+                      }
+                      
+                      // Upload new image
+                      newImageUrl = await StorageService.uploadProfilePicture(
+                        selectedImageFile!,
+                        currentUser.uid,
+                      );
+                      
+                      if (newImageUrl == null) {
+                        throw Exception('Failed to upload profile picture');
+                      }
+                      
+                      // Update Firebase Auth photoURL
+                      await currentUser.updatePhotoURL(newImageUrl);
+                    } else if (imageUrl == null && currentImageUrl != null && currentUser != null) {
+                      // User removed the profile picture
+                      // Delete old image from storage if it exists and is not from Google
+                      if (!currentImageUrl.contains('googleusercontent.com') &&
+                          !currentImageUrl.contains('googleapis.com')) {
+                        try {
+                          await StorageService.deleteImage(currentImageUrl!);
+                        } catch (e) {
+                          // Ignore deletion errors
+                          debugPrint('Error deleting old profile image: $e');
+                        }
+                      }
+                      
+                      // Note: Firebase Auth doesn't allow setting photoURL to null
+                      // We'll just update Firestore, and the app will use Firestore profileImageUrl
+                      // which will be null, effectively removing the profile picture
+                    }
+                    
+                    // Update Firebase Auth display name
+                    await currentUser?.updateDisplayName(nameController.text.trim());
+                    await currentUser?.reload();
+                    
+                    // Update Firestore profile
+                    final profileUpdate = <String, dynamic>{
+                      'name': nameController.text.trim(),
+                      'location': locationController.text.trim(),
+                      'updatedAt': DateTime.now().toIso8601String(),
+                    };
+                    
+                    // Update profileImageUrl - use FieldValue.delete() to remove, or set new URL if updated
+                    if (imageUrl == null && currentImageUrl != null) {
+                      // User removed the profile picture - delete the field
+                      profileUpdate['profileImageUrl'] = FieldValue.delete();
+                    } else if (newImageUrl != null) {
+                      // User uploaded a new profile picture
+                      profileUpdate['profileImageUrl'] = newImageUrl;
+                    }
+                    
+                    await _firestoreService.updateUserProfile(profileUpdate);
+                    
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profile updated successfully')),
+                      );
+                      setState(() {}); // Refresh UI
+                    }
+                  } catch (e) {
+                    setDialogState(() {
+                      isLoading = false;
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error updating profile: $e')),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showEmailSettingsDialog() {
-    showDialog(
+  void _showEmailSettingsDialog() async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null || !_authService.isEmailPasswordUser()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email can only be changed for email/password accounts')),
+      );
+      return;
+    }
+    
+    final emailController = TextEditingController(
+      text: currentUser.email ?? '',
+    );
+    final passwordController = TextEditingController();
+    
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
+    bool obscurePassword = true;
+    
+    await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Email Settings'),
-        content: const Text('Email settings feature will be available soon.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Update Email'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Enter your current password and new email address',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Current Password',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscurePassword ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setDialogState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: obscurePassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your current password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'New Email',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a new email address';
+                      }
+                      if (value == currentUser.email) {
+                        return 'New email must be different from current email';
+                      }
+                      if (!value.contains('@') || !value.contains('.')) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading ? null : () async {
+                if (formKey.currentState!.validate()) {
+                  setDialogState(() {
+                    isLoading = true;
+                  });
+                  
+                  try {
+                    await _authService.updateEmail(
+                      emailController.text.trim(),
+                      passwordController.text,
+                    );
+                    
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Email updated successfully')),
+                      );
+                      setState(() {}); // Refresh UI
+                    }
+                  } catch (e) {
+                    setDialogState(() {
+                      isLoading = false;
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error updating email: $e')),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Update Email'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showChangePasswordDialog() {
-    showDialog(
+  void _showChangePasswordDialog() async {
+    if (!_authService.isEmailPasswordUser()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password change is only available for email/password accounts')),
+      );
+      return;
+    }
+    
+    final currentPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
+    bool obscureCurrentPassword = true;
+    bool obscureNewPassword = true;
+    bool obscureConfirmPassword = true;
+    
+    await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
-        content: const Text('Password change feature will be available soon.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Change Password'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: currentPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Current Password',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureCurrentPassword ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setDialogState(() {
+                            obscureCurrentPassword = !obscureCurrentPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: obscureCurrentPassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your current password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: newPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'New Password',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureNewPassword ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setDialogState(() {
+                            obscureNewPassword = !obscureNewPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: obscureNewPassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a new password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      if (value == currentPasswordController.text) {
+                        return 'New password must be different from current password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm New Password',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setDialogState(() {
+                            obscureConfirmPassword = !obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: obscureConfirmPassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your new password';
+                      }
+                      if (value != newPasswordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading ? null : () async {
+                if (formKey.currentState!.validate()) {
+                  setDialogState(() {
+                    isLoading = true;
+                  });
+                  
+                  try {
+                    await _authService.updatePassword(
+                      currentPasswordController.text,
+                      newPasswordController.text,
+                    );
+                    
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Password updated successfully')),
+                      );
+                    }
+                  } catch (e) {
+                    setDialogState(() {
+                      isLoading = false;
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error updating password: $e')),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text('Change Password'),
+            ),
+          ],
+        ),
       ),
     );
   }

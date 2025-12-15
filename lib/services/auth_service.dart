@@ -155,6 +155,66 @@ class AuthService {
     return 'Visitor';
   }
 
+  // Check if user signed in with email/password
+  bool isEmailPasswordUser() {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    
+    // Check if user has password provider
+    return user.providerData.any((info) => info.providerId == 'password');
+  }
+
+  // Re-authenticate user (required for sensitive operations)
+  Future<void> reauthenticateWithPassword(String password) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+    if (user.email == null) throw Exception('User email not found');
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  // Update user email
+  Future<void> updateEmail(String newEmail, String password) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    try {
+      // Re-authenticate first
+      await reauthenticateWithPassword(password);
+      // Update email
+      await user.updateEmail(newEmail);
+      // Update email in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'email': newEmail,
+      });
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  // Update user password
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    try {
+      // Re-authenticate first
+      await reauthenticateWithPassword(currentPassword);
+      // Update password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
   // Handle Firebase Auth Exceptions
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
@@ -174,6 +234,10 @@ class AuthService {
         return 'Too many attempts. Try again later.';
       case 'operation-not-allowed':
         return 'This operation is not allowed.';
+      case 'requires-recent-login':
+        return 'Please log out and log back in before changing your email or password.';
+      case 'invalid-credential':
+        return 'Invalid credentials provided.';
       default:
         return e.message ?? 'An error occurred during authentication.';
     }

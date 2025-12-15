@@ -90,6 +90,16 @@ class StorageService {
     );
   }
 
+  /// Upload profile picture for users
+  static Future<String?> uploadProfilePicture(File imageFile, String userId) async {
+    final fileName = '${userId}_${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
+    return await uploadImage(
+      imageFile: imageFile,
+      folder: 'profile_pictures',
+      fileName: fileName,
+    );
+  }
+
   /// Show image picker dialog and return selected image
   static Future<File?> showImagePickerDialog() async {
     // This would typically show a dialog with options for camera/gallery
